@@ -5,6 +5,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    trim: true
   },
   password: {
     type: String,
@@ -14,12 +15,46 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    lowercase: true,
   },
-  profile_photo : {
-    type : Buffer,
-    required: false,
+  profile_photo: {
+    type: Buffer,
   },
-  isServiceProvider: {
+
+  role: {
+    type: String,
+    enum: ['customer', 'provider', 'admin'],
+    default: 'customer',
+  },
+
+  serviceType: {
+    type: String,
+    required: function () {
+      return this.role === 'provider';
+    },
+  },
+  contact: {
+    type: Number,
+    required: function () {
+      return  this.role === 'provider';
+    },
+  },
+  address: {
+    type: String,
+    required: function () {
+      return this.role === 'provider';
+    },
+  },
+  ratings: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 5,
+    required: function () {
+      return this.role === 'provider';
+    },
+  },
+  approve_status: {
     type: Boolean,
     default: false,
   },

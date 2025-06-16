@@ -3,7 +3,7 @@ const user_schema = require('../models/user_model');
 const bcrypt = require('bcrypt');
 
 const login = async (req, res) => {
-    const { email, password , isServiceProvider} = req.body;
+    const { email, password , role} = req.body;
 
     try {
         const user = await user_schema.findOne({ email });
@@ -16,12 +16,16 @@ const login = async (req, res) => {
             return res.status(400).json({ message: 'Invalid email or password' });
         }
 
-        const token = jwt.sign({ email , isServiceProvider }, process.env.JWT_SECRET, {
+        const token = jwt.sign({ email : user.email , role : user.role}, process.env.JWT_SECRET, {
             expiresIn: '1h'
         });
         console.log('Generated JWT token:', token);
-        res.cookie('token', token); 
-        console.log(res.cookies.isServiceProvider);
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: false, 
+        });
+
+
         return res.status(200).json({ message: 'Login successful', token });
 
     } catch (error) {
