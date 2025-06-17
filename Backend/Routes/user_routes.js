@@ -33,6 +33,7 @@ router.get('/admin/all_customers' , authenticateUser, authorizeAdmin , async (re
         res.status(500).json({ message: 'Error fetching customers', error });
     }
 });
+
 router.get('/admin/all_providers' , authenticateUser , authorizeAdmin , async(req , res)=>{
     try{
         let providers= await User.find({role : 'provider' , status :'approved'});
