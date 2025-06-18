@@ -54,10 +54,12 @@ const userSchema = new mongoose.Schema({
       return this.role === 'provider';
     },
   },
-  approve_status: {
-    type: Boolean,
-    default: false,
-  },
+  status: {
+  type: String,
+  enum: ['pending', 'inqueue', 'approved'],
+  default: 'pending'
+},
+
   createdAt: {
     type: Date,
     default: Date.now,

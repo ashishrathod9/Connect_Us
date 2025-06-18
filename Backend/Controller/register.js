@@ -4,11 +4,9 @@ const multer = require('multer');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-
 const register = async (req, res) => {
     const { username, password, email } = req.body;
-    const profilePhoto = req.file ? req.file.buffer : null;
-
+    const profile_photo = req.file ? req.file.buffer : null;
 
     try {
         const existingUser = await user_schema.findOne({ email });
@@ -23,7 +21,8 @@ const register = async (req, res) => {
             username,
             password: hashedPassword,
             email,
-            profilePhoto
+            profile_photo,
+
         });
 
         await newUser.save();

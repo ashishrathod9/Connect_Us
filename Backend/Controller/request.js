@@ -15,7 +15,7 @@ const request_ = async (req, res) => {
         contact,
         address,
         role: 'provider',
-        approve_status: 'false',
+        status: 'inqueue',
       },
       { new: true }
     );
