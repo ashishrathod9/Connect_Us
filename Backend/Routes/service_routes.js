@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const authenticateUser = require('../middleware/authenticateUser');
+const authorizeAdmin = require('../middleware/authorizeAdmin');
 const {
     createService,
     getAllServices,
@@ -11,14 +13,14 @@ const {
 } = require('../Controller/service');
 
 // Public routes
-router.get('/', getAllServices);
-router.get('/search', searchServices);
-router.get('/category/:categoryId', getServicesByCategory);
-router.get('/:id', getServiceById);
+router.get('/', authenticateUser , getAllServices);
+router.get('/search', authenticateUser , searchServices);
+router.get('/category/:categoryId', authenticateUser , getServicesByCategory);
+router.get('/:id', authenticateUser , getServiceById);
 
 // Protected routes (you'll need to add authentication middleware)
-router.post('/', createService); // Admin only
-router.put('/:id', updateService); // Admin only
-router.delete('/:id', deleteService); // Admin only
+router.post('/', authenticateUser, authorizeAdmin ,  createService); // Admin only
+router.put('/:id', authenticateUser, authorizeAdmin , updateService); // Admin only
+router.delete('/:id', authenticateUser, authorizeAdmin , deleteService); // Admin only
 
 module.exports = router;
