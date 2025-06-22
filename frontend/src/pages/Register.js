@@ -3,7 +3,8 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
-import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, Upload } from 'lucide-react'
+import CloudinaryService from "../services/cloudinary"
+import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, Upload, ImageIcon } from "lucide-react"
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -18,6 +19,8 @@ const Register = () => {
     serviceType: "",
   })
   const [profilePhoto, setProfilePhoto] = useState(null)
+  const [profilePhotoPreview, setProfilePhotoPreview] = useState(null)
+  const [uploadingImage, setUploadingImage] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -34,8 +37,38 @@ const Register = () => {
     setError("")
   }
 
-  const handleFileChange = (e) => {
-    setProfilePhoto(e.target.files[0])
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      setError("Please select a valid image file")
+      return
+    }
+
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image size should be less than 5MB")
+      return
+    }
+
+    setProfilePhoto(file)
+
+    // Create preview
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      setProfilePhotoPreview(e.target.result)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const removePhoto = () => {
+    setProfilePhoto(null)
+    setProfilePhotoPreview(null)
+    // Reset file input
+    const fileInput = document.getElementById("profilePhoto")
+    if (fileInput) fileInput.value = ""
   }
 
   const handleSubmit = async (e) => {
@@ -50,13 +83,22 @@ const Register = () => {
     }
 
     try {
-      // Map 'name' to 'username' for backend compatibility
-      const submitData = { 
-        ...formData,
-        username: formData.name  // Add this line
-      }
+      const submitData = { ...formData }
+
+      // Upload image to Cloudinary if selected
       if (profilePhoto) {
-        submitData.profile_photo = profilePhoto
+        setUploadingImage(true)
+        try {
+          const uploadResult = await CloudinaryService.uploadImage(profilePhoto, "connectus/profiles")
+          submitData.profilePhoto = uploadResult.url // Use profilePhoto field instead
+        } catch (uploadError) {
+          console.error("Image upload failed:", uploadError)
+          setError("Failed to upload profile photo. Please try again.")
+          setLoading(false)
+          setUploadingImage(false)
+          return
+        }
+        setUploadingImage(false)
       }
 
       await register(submitData)
@@ -77,11 +119,7 @@ const Register = () => {
             <p className="text-gray-600 mt-2">Join ConnectUs and start connecting with service providers</p>
           </div>
 
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
-              {error}
-            </div>
-          )}
+          {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">{error}</div>}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -269,31 +307,47 @@ const Register = () => {
             )}
 
             <div>
-              <label htmlFor="profile_photo" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="profilePhoto" className="block text-sm font-medium text-gray-700 mb-2">
                 Profile Photo (Optional)
               </label>
-              <div className="relative">
-                <Upload size={20} className="absolute left-3 top-3 text-gray-400" />
-                <input
-                  type="file"
-                  id="profile_photo"
-                  name="profile_photo"
-                  onChange={handleFileChange}
-                  accept="image/*"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                />
-              </div>
-              {profilePhoto && (
-                <p className="mt-2 text-sm text-gray-600">Selected: {profilePhoto.name}</p>
+
+              {profilePhotoPreview ? (
+                <div className="flex items-center space-x-4">
+                  <div className="relative">
+                    <ImageIcon
+                      src={profilePhotoPreview || "/placeholder.svg"}
+                      alt="Profile preview"
+                      className="w-20 h-20 rounded-full object-cover border-2 border-gray-300"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-600 mb-2">Selected: {profilePhoto?.name}</p>
+                    <button type="button" onClick={removePhoto} className="text-red-600 hover:text-red-700 text-sm">
+                      Remove Photo
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="relative">
+                  <Upload size={20} className="absolute left-3 top-3 text-gray-400" />
+                  <input
+                    type="file"
+                    id="profilePhoto"
+                    name="profilePhoto"
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                </div>
               )}
             </div>
 
             <button
               type="submit"
               className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              disabled={loading}
+              disabled={loading || uploadingImage}
             >
-              {loading ? "Creating Account..." : "Create Account"}
+              {uploadingImage ? "Uploading Image..." : loading ? "Creating Account..." : "Create Account"}
             </button>
           </form>
 

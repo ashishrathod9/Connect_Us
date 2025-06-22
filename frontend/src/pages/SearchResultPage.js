@@ -1,36 +1,39 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useParams, Link } from "react-router-dom"
+import { useLocation, Link } from "react-router-dom"
 import AuthService from "../services/authService"
-import { ArrowLeft, Star, MapPin, Phone, Mail, User } from "lucide-react"
+import { Search, Star, MapPin, Phone, Mail, User, ArrowLeft } from "lucide-react"
 
-const CategoryServices = () => {
-  const { categoryId } = useParams()
-  const [services, setServices] = useState([])
-  const [category, setCategory] = useState(null)
+const SearchResultPage = () => {
+  const [results, setResults] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const location = useLocation()
+
+  const query = new URLSearchParams(location.search).get("q")
 
   useEffect(() => {
-    const fetchCategoryServices = async () => {
+    if (!query) {
+      setLoading(false)
+      return
+    }
+
+    const fetchResults = async () => {
       try {
         setLoading(true)
-        const [servicesData, categoryData] = await Promise.all([
-          AuthService.getServicesByCategory(categoryId),
-          AuthService.getServiceCategoryById(categoryId),
-        ])
-        setServices(servicesData.services || servicesData || [])
-        setCategory(categoryData)
+        const response = await AuthService.searchServices(query)
+        setResults(response || [])
       } catch (err) {
-        setError("Failed to fetch services for this category.")
+        setError("An error occurred while searching.")
         console.error(err)
       } finally {
         setLoading(false)
       }
     }
-    fetchCategoryServices()
-  }, [categoryId])
+
+    fetchResults()
+  }, [query])
 
   if (loading) {
     return (
@@ -44,7 +47,7 @@ const CategoryServices = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Category</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Search Error</h2>
           <p className="text-red-600 mb-6">{error}</p>
           <Link
             to="/services"
@@ -65,23 +68,24 @@ const CategoryServices = () => {
             <ArrowLeft size={20} className="mr-2" />
             Back to Services
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {category ? `Services in ${category.name}` : "Category Services"}
-          </h1>
-          {category?.description && <p className="text-gray-600">{category.description}</p>}
+          <div className="flex items-center mb-4">
+            <Search size={24} className="text-gray-600 mr-3" />
+            <h1 className="text-3xl font-bold text-gray-900">Search Results for "{query}"</h1>
+          </div>
+          <p className="text-gray-600">Found {results.length} service(s) matching your search</p>
         </div>
 
-        {services.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {services.map((service) => (
+        {results.length > 0 ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {results.map((service) => (
               <div
                 key={service._id}
                 className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
               >
                 <div className="p-6">
-                  <div className="flex justify-between items-start mb-3">
-                    <h2 className="text-xl font-semibold text-gray-900">{service.name}</h2>
-                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-medium">
+                  <div className="flex justify-between items-start mb-4">
+                    <h2 className="text-xl font-bold text-gray-900">{service.name}</h2>
+                    <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
                       Available
                     </span>
                   </div>
@@ -89,28 +93,28 @@ const CategoryServices = () => {
                   <p className="text-gray-600 mb-4 line-clamp-2">{service.description}</p>
 
                   {/* Provider Information */}
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-3 rounded-lg mb-4">
-                    <div className="flex items-center mb-2">
-                      <User size={16} className="mr-2" />
-                      <span className="font-semibold">{service.provider?.name || "Provider Not Assigned"}</span>
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-lg mb-4">
+                    <div className="flex items-center mb-3">
+                      <User size={20} className="mr-2" />
+                      <span className="font-semibold text-lg">{service.provider?.name || "Provider Not Assigned"}</span>
                     </div>
 
-                    <div className="space-y-1 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                       {service.provider?.email && (
                         <div className="flex items-center">
-                          <Mail size={14} className="mr-2" />
+                          <Mail size={16} className="mr-2" />
                           <span className="truncate">{service.provider.email}</span>
                         </div>
                       )}
                       {service.provider?.phone && (
                         <div className="flex items-center">
-                          <Phone size={14} className="mr-2" />
+                          <Phone size={16} className="mr-2" />
                           <span>{service.provider.phone}</span>
                         </div>
                       )}
                       {service.provider?.address && (
                         <div className="flex items-center">
-                          <MapPin size={14} className="mr-2" />
+                          <MapPin size={16} className="mr-2" />
                           <span className="truncate">{service.provider.address}</span>
                         </div>
                       )}
@@ -131,23 +135,30 @@ const CategoryServices = () => {
                               : "bg-yellow-200 text-yellow-800"
                           }`}
                         >
-                          {service.provider.status}
+                          Status: {service.provider.status}
                         </span>
                       </div>
                     )}
                   </div>
 
+                  {/* Service Details */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {service.category?.name && (
+                      <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
+                        {service.category.name}
+                      </span>
+                    )}
+                    <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm">
+                      ${service.basePrice || service.price || "50"} {service.unit || "per service"}
+                    </span>
+                  </div>
+
                   <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-lg font-bold text-blue-600">
-                        ${service.basePrice || service.price || "50"} {service.unit || "per service"}
-                      </div>
-                      <div className="flex items-center text-sm text-gray-600">
-                        <Star size={14} className="text-yellow-400 mr-1" />
-                        <span>
-                          {service.rating || "4.5"} ({service.reviewCount || "12"} reviews)
-                        </span>
-                      </div>
+                    <div className="flex items-center">
+                      <Star size={16} className="text-yellow-400 mr-1" />
+                      <span className="text-gray-600 text-sm">
+                        {service.rating || "4.5"} ({service.reviewCount || "12"} reviews)
+                      </span>
                     </div>
 
                     <Link
@@ -163,11 +174,11 @@ const CategoryServices = () => {
           </div>
         ) : (
           <div className="text-center py-12">
-            <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-gray-400 text-2xl">📋</span>
-            </div>
+            <Search size={64} className="mx-auto text-gray-400 mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-4">No services found</h3>
-            <p className="text-gray-600 mb-6">There are no services available in this category yet.</p>
+            <p className="text-gray-600 mb-6">
+              We couldn't find any services matching "{query}". Try adjusting your search terms.
+            </p>
             <Link
               to="/services"
               className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
@@ -181,4 +192,4 @@ const CategoryServices = () => {
   )
 }
 
-export default CategoryServices
+export default SearchResultPage

@@ -41,9 +41,19 @@ const Navbar = () => {
               Home
             </Link>
             {isAuthenticated && (
-              <Link to="/services" className="text-gray-700 hover:text-blue-600 transition-colors">
-                Services
-              </Link>
+              <>
+                <Link to="/services" className="text-gray-700 hover:text-blue-600 transition-colors">
+                  Services
+                </Link>
+                <Link to="/dashboard" className="text-gray-700 hover:text-blue-600 transition-colors">
+                  Dashboard
+                </Link>
+                {(user?.role === "admin" || user?.role === "provider") && (
+                  <Link to="/manage" className="text-gray-700 hover:text-blue-600 transition-colors">
+                    Manage
+                  </Link>
+                )}
+              </>
             )}
           </div>
 
@@ -60,20 +70,12 @@ const Navbar = () => {
 
                 {isProfileMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                    <Link
-                      to="/profile"
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => setIsProfileMenuOpen(false)}
-                    >
+                    <Link to="/profile" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                       <Settings size={16} className="mr-2" />
                       Profile
                     </Link>
                     {user?.role === "admin" && (
-                      <Link
-                        to="/admin"
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        onClick={() => setIsProfileMenuOpen(false)}
-                      >
+                      <Link to="/admin" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                         <Shield size={16} className="mr-2" />
                         Admin Dashboard
                       </Link>
@@ -120,6 +122,14 @@ const Navbar = () => {
                 <Link to="/services" className="block px-3 py-2 text-gray-700 hover:text-blue-600 transition-colors">
                   Services
                 </Link>
+                <Link to="/dashboard" className="block px-3 py-2 text-gray-700 hover:text-blue-600 transition-colors">
+                  Dashboard
+                </Link>
+                {(user?.role === "admin" || user?.role === "provider") && (
+                  <Link to="/manage" className="block px-3 py-2 text-gray-700 hover:text-blue-600 transition-colors">
+                    Manage
+                  </Link>
+                )}
                 <Link to="/profile" className="block px-3 py-2 text-gray-700 hover:text-blue-600 transition-colors">
                   Profile
                 </Link>

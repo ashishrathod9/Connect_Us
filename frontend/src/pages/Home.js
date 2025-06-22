@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
@@ -18,7 +16,7 @@ const Home = () => {
   const fetchCategories = async () => {
     try {
       const response = await ServiceCategoryService.getAllCategories()
-      setCategories(response.slice(0, 6))
+      setCategories((response.categories || []).slice(0, 6))
     } catch (error) {
       console.error("Error fetching categories:", error)
     } finally {
@@ -143,7 +141,7 @@ const Home = () => {
                 {categories.map((category) => (
                   <Link
                     key={category._id}
-                    to={`/services?category=${category._id}`}
+                    to={`/services/category/${category._id}`}
                     className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow"
                   >
                     <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mb-4">

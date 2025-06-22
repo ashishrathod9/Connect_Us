@@ -8,7 +8,11 @@ import Profile from "./pages/Profile"
 import Services from "./pages/Services"
 import ServiceDetails from "./pages/ServiceDetails"
 import AdminDashboard from "./pages/AdminDashboard"
-import ProtectedRoute from "./components/layout/Protecedroute"
+import ProtectedRoute from "./components/layout/ProtectedRoute"
+import SearchResultPage from "./pages/SearchResultPage"
+import CategoryServices from "./pages/CategoryServices"
+import Dashboard from "./pages/Dashboard"
+import ServiceManagement from "./pages/ServiceManagement"
 
 function App() {
   return (
@@ -54,6 +58,38 @@ function App() {
                 }
               />
               <Route path="*" element={<Navigate to="/" />} />
+              <Route
+                path="/search"
+                element={
+                  <ProtectedRoute>
+                    <SearchResultPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/category/:categoryId"
+                element={
+                  <ProtectedRoute>
+                    <CategoryServices />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/manage"
+                element={
+                  <ProtectedRoute>
+                    <ServiceManagement />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           </main>
         </div>

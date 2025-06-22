@@ -1,143 +1,165 @@
-const API_BASE_URL = 'http://localhost:3000/api'; // Updated to match your server port
+import ApiService from "./api"
 
 class AuthService {
-  constructor() {
-    this.baseURL = API_BASE_URL;
-  }
-
-  getAuthHeaders() {
-    const token = localStorage.getItem("token");
-    return {
-      "Content-Type": "application/json",
-      ...(token && { Authorization: `Bearer ${token}` }),
-    };
-  }
-
-  getAuthHeadersForFormData() {
-    const token = localStorage.getItem("token");
-    return {
-      ...(token && { Authorization: `Bearer ${token}` }),
-    };
-  }
-
-  async request(endpoint, options = {}) {
-    try {
-      const url = `${this.baseURL}${endpoint}`;
-      const config = {
-        headers: this.getAuthHeaders(),
-        ...options,
-      };
-
-      const response = await fetch(url, config);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || `HTTP error! status: ${response.status}`);
-      }
-
-      return data;
-    } catch (error) {
-      console.error('API request error:', error);
-      throw error;
-    }
-  }
-
-  async requestWithFormData(endpoint, formData) {
-    try {
-      const url = `${this.baseURL}${endpoint}`;
-      const response = await fetch(url, {
-        method: "POST",
-        headers: this.getAuthHeadersForFormData(),
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Something went wrong");
-      }
-
-      return data;
-    } catch (error) {
-      console.error("FormData API error:", error);
-      throw error;
-    }
-  }
-
-  // ============================
-  // Auth-related methods
-  // ============================
-  async login(credentials) {
-    return await this.request('/users/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
-  }
-
   async register(userData) {
-    return await this.request('/users/register', {
-      method: 'POST',
+    return await ApiService.request("/users/register", {
+      method: "POST",
       body: JSON.stringify(userData),
-    });
+    })
   }
 
-  async getUserProfile() {
-    return await this.request('/users/profile');
+  async login(credentials) {
+    return await ApiService.request("/users/login", {
+      method: "POST",
+      body: JSON.stringify(credentials),
+    })
   }
 
-  // ============================
-  // Admin-specific methods
-  // ============================
+  async logout() {
+    return await ApiService.request("/users/logout")
+  }
+
+  async getProfile() {
+    return await ApiService.request("/users/profile")
+  }
+
+  async updateProfile(userData) {
+    console.log("Sending update data:", userData) // Debug log
+
+    const response = await ApiService.request("/users/profile/update", {
+      method: "PUT",
+      body: JSON.stringify(userData),
+    })
+
+    console.log("Update profile response:", response) // Debug log
+
+    return response
+  }
+
+  async requestProviderStatus() {
+    return await ApiService.request("/users/request/provider", {
+      method: "POST",
+    })
+  }
+
+  // Admin methods
   async getAllCustomers() {
-    return await this.request('/users/admin/all_customers');
+    return await ApiService.request("/users/admin/all_customers")
   }
 
   async getAllProviders() {
-    return await this.request('/users/admin/all_providers');
+    return await ApiService.request("/users/admin/all_providers")
   }
 
   async getProviderApplications() {
-    return await this.request('/users/admin/applications');
+    return await ApiService.request("/users/admin/applications")
   }
 
   async approveProvider(id) {
-    return await this.request(`/users/admin/approve/${id}`, {
-      method: 'PUT',
-    });
+    return await ApiService.request(`/users/admin/approve/${id}`, {
+      method: "PUT",
+    })
   }
 
   async rejectProvider(id) {
-    return await this.request(`/users/admin/reject/${id}`, {
-      method: 'PUT',
-    });
+    return await ApiService.request(`/users/admin/reject/${id}`, {
+      method: "PUT",
+    })
   }
 
-  // ============================
-  // Services & Categories
-  // ============================
-  async getServiceCategories() {
-    const data = await this.request('/service-categories');
-    return data.categories || [];
+  // Search services
+  async searchServices(query) {
+    return await ApiService.request(`/services/search?q=${encodeURIComponent(query)}`)
   }
 
-  async getServiceCategoryById(id) {
-    const data = await this.request(`/service-categories/${id}`);
-    return data.category;
-  }
-
+  // Get services by category
   async getServicesByCategory(categoryId) {
-    return await this.request(`/services/category/${categoryId}`);
+    return await ApiService.request(`/services/category/${categoryId}`)
   }
 
+  // Get service category by ID
+  async getServiceCategoryById(categoryId) {
+    return await ApiService.request(`/service-categories/${categoryId}`)
+  }
+
+  // Get all service categories
+  async getServiceCategories() {
+    return await ApiService.request("/service-categories")
+  }
+
+  // Create service category
+  async createServiceCategory(categoryData) {
+    return await ApiService.request("/service-categories", {
+      method: "POST",
+      body: JSON.stringify(categoryData),
+    })
+  }
+
+  // Update service category
+  async updateServiceCategory(id, categoryData) {
+    return await ApiService.request(`/service-categories/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(categoryData),
+    })
+  }
+
+  // Delete service category
+  async deleteServiceCategory(id) {
+    return await ApiService.request(`/service-categories/${id}`, {
+      method: "DELETE",
+    })
+  }
+
+  // Create service
+  async createService(serviceData) {
+    return await ApiService.request("/services", {
+      method: "POST",
+      body: JSON.stringify(serviceData),
+    })
+  }
+
+  // Update service
+  async updateService(id, serviceData) {
+    return await ApiService.request(`/services/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(serviceData),
+    })
+  }
+
+  // Delete service
+  async deleteService(id) {
+    return await ApiService.request(`/services/${id}`, {
+      method: "DELETE",
+    })
+  }
+
+  // Get all services
   async getAllServices() {
-    const data = await this.request('/services');
-    return data.services || [];
+    return await ApiService.request("/services")
   }
 
-  async getServiceById(id) {
-    const data = await this.request(`/services/${id}`);
-    return data.service;
+  // Hire related methods (previously booking methods)
+  async getCustomerHires() {
+    return await ApiService.request("/bookings/customer")
+  }
+
+  async getProviderHires() {
+    return await ApiService.request("/bookings/provider")
+  }
+
+  async updateHireStatus(hireId, status) {
+    return await ApiService.request(`/bookings/${hireId}/status`, {
+      method: "PUT",
+      body: JSON.stringify({ status }),
+    })
+  }
+
+  async createHire(hireData) {
+    return await ApiService.request("/bookings", {
+      method: "POST",
+      body: JSON.stringify(hireData),
+    })
   }
 }
 
-export default new AuthService();
+export default new AuthService()

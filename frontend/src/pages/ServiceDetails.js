@@ -30,10 +30,10 @@ const ServiceDetails = () => {
     }
   }
 
-  const handleBookService = async () => {
+  const handleHireProvider = async () => {
     setBookingLoading(true)
     setTimeout(() => {
-      alert("Booking request sent! The service provider will contact you soon.")
+      alert("Hire request sent! The provider will contact you soon.")
       setBookingLoading(false)
     }, 2000)
   }
@@ -79,7 +79,11 @@ const ServiceDetails = () => {
             <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
               <div className="h-64 md:h-80 bg-gray-200 flex items-center justify-center">
                 {service.image ? (
-                  <img src={service.image || "/placeholder.svg"} alt={service.name} className="w-full h-full object-cover" />
+                  <img
+                    src={service.image || "/placeholder.svg"}
+                    alt={service.name}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   <div className="w-24 h-24 bg-gray-400 rounded"></div>
                 )}
@@ -94,7 +98,9 @@ const ServiceDetails = () => {
                         <Star
                           key={index}
                           size={20}
-                          className={index < Math.floor(service.rating || 4.5) ? "text-yellow-400 fill-current" : "text-gray-300"}
+                          className={
+                            index < Math.floor(service.rating || 4.5) ? "text-yellow-400 fill-current" : "text-gray-300"
+                          }
                         />
                       ))}
                     </div>
@@ -167,9 +173,7 @@ const ServiceDetails = () => {
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (
-                      <span className="text-gray-600 font-semibold">
-                        {service.provider?.name?.charAt(0) || "P"}
-                      </span>
+                      <span className="text-gray-600 font-semibold">{service.provider?.name?.charAt(0) || "P"}</span>
                     )}
                   </div>
                   <div>
@@ -191,15 +195,15 @@ const ServiceDetails = () => {
               </div>
 
               <button
-                onClick={handleBookService}
+                onClick={handleHireProvider}
                 disabled={bookingLoading}
                 className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mb-4"
               >
-                {bookingLoading ? "Sending Request..." : "Book This Service"}
+                {bookingLoading ? "Sending Request..." : "Hire Provider"}
               </button>
 
               <p className="text-xs text-gray-500 text-center">
-                By booking, you agree to our terms of service. The provider will contact you to confirm details.
+                By hiring, you agree to our terms of service. The provider will contact you to confirm details.
               </p>
             </div>
 

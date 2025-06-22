@@ -3,15 +3,14 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
 import AuthService from "../services/authService"
+import CloudinaryService from "../services/cloudinary"
 import { User, Mail, Phone, MapPin, Edit, Save, X, Upload } from "lucide-react"
 
 const Profile = () => {
-  const authContext = useAuth()
-  console.log("Auth context in Profile:", authContext)
-
-  const { user, updateUser } = authContext
+  const { user, updateUser } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const [formData, setFormData] = useState({
@@ -23,6 +22,7 @@ const Profile = () => {
     serviceType: "",
   })
   const [profilePhoto, setProfilePhoto] = useState(null)
+  const [profilePhotoPreview, setProfilePhotoPreview] = useState(null)
 
   useEffect(() => {
     if (user) {
@@ -36,22 +36,6 @@ const Profile = () => {
       })
     }
   }, [user])
-  const Profile = () => {
-  const authContext = useAuth()
-  console.log("Auth context in Profile:", authContext)
-
-  const { user, updateUser } = authContext
-  
-  // ADD THESE DEBUG LOGS
-  console.log("User object:", user)
-  console.log("User type:", typeof user)
-  console.log("User keys:", user ? Object.keys(user) : 'user is null/undefined')
-  console.log("User name:", user?.name)
-  console.log("User email:", user?.email)
-  console.log("User role:", user?.role)
-
-  // ... rest of your component
-}
 
   const handleChange = (e) => {
     setFormData({
@@ -62,66 +46,84 @@ const Profile = () => {
     setSuccess("")
   }
 
-  const handleFileChange = (e) => {
-    setProfilePhoto(e.target.files[0])
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      setError("Please select a valid image file")
+      return
+    }
+
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image size should be less than 5MB")
+      return
+    }
+
+    setProfilePhoto(file)
+
+    // Create preview
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      setProfilePhotoPreview(e.target.result)
+    }
+    reader.readAsDataURL(file)
   }
 
-  // In your Profile component's handleSubmit function, add this data mapping:
-
-const handleSubmit = async (e) => {
-  e.preventDefault()
-  setLoading(true)
-  setError("")
-  setSuccess("")
-
-  try {
-    // Map frontend field names to backend field names
-    const submitData = {
-      username: formData.name,  // Backend expects 'username', frontend uses 'name'
-      email: formData.email,
-      phone: formData.phone,
-      address: formData.address,
-      contact: formData.contact,
-      serviceType: formData.serviceType,
-    }
-    
-    if (profilePhoto) {
-      submitData.profile_photo = profilePhoto
-    }
-
-    console.log("Calling AuthService.updateProfile with:", submitData)
-    const response = await AuthService.updateProfile(submitData)
-    console.log("Profile update response:", response)
-
-    // Handle updateUser function - check if it exists and is a function
-    if (typeof updateUser === "function") {
-      updateUser(response.user)
-    } else {
-      console.warn("updateUser function not available in AuthContext")
-    }
-    
-    setSuccess("Profile updated successfully!")
-    setIsEditing(false)
+  const removePhoto = () => {
     setProfilePhoto(null)
-    
-  } catch (error) {
-    console.error("Profile update error:", error)
-    setError(error.message || "Failed to update profile")
-  } finally {
-    setLoading(false)
+    setProfilePhotoPreview(null)
+    // Reset file input
+    const fileInput = document.getElementById("profilePhoto")
+    if (fileInput) fileInput.value = ""
   }
-}
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setError("")
+    setSuccess("")
+
+    try {
+      const submitData = { ...formData }
+
+      // Upload image to Cloudinary if selected
+      if (profilePhoto) {
+        setUploadingImage(true)
+        try {
+          const uploadResult = await CloudinaryService.uploadImage(profilePhoto, "connectus/profiles")
+          submitData.profilePhoto = uploadResult.url // Use profilePhoto field instead
+        } catch (uploadError) {
+          console.error("Image upload failed:", uploadError)
+          setError("Failed to upload profile photo. Please try again.")
+          setLoading(false)
+          setUploadingImage(false)
+          return
+        }
+        setUploadingImage(false)
+      }
+
+      const response = await AuthService.updateProfile(submitData)
+      updateUser(response.user)
+      setSuccess("Profile updated successfully!")
+      setIsEditing(false)
+      setProfilePhoto(null)
+      setProfilePhotoPreview(null)
+    } catch (error) {
+      setError(error.message || "Failed to update profile")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleRequestProvider = async () => {
     try {
       setLoading(true)
-      setError("")
-      setSuccess("")
-
       await AuthService.requestProviderStatus()
       setSuccess("Provider request submitted! We will review your application.")
     } catch (error) {
-      console.error("Provider request error:", error)
       setError(error.message || "Failed to submit provider request")
     } finally {
       setLoading(false)
@@ -131,13 +133,14 @@ const handleSubmit = async (e) => {
   const cancelEdit = () => {
     setIsEditing(false)
     setProfilePhoto(null)
+    setProfilePhotoPreview(null)
     setFormData({
-      name: user?.name || "",
-      email: user?.email || "",
-      phone: user?.phone || "",
-      address: user?.address || "",
-      contact: user?.contact || "",
-      serviceType: user?.serviceType || "",
+      name: user.name || "",
+      email: user.email || "",
+      phone: user.phone || "",
+      address: user.address || "",
+      contact: user.contact || "",
+      serviceType: user.serviceType || "",
     })
     setError("")
     setSuccess("")
@@ -151,18 +154,35 @@ const handleSubmit = async (e) => {
     )
   }
 
+  const getProfileImageUrl = () => {
+    // Use the existing profilePhoto field
+    if (user.profilePhoto) {
+      // If it's a Cloudinary URL, optimize it
+      if (user.profilePhoto.includes("cloudinary.com")) {
+        return CloudinaryService.getOptimizedUrl(user.profilePhoto, {
+          width: 96,
+          height: 96,
+          crop: "fill",
+        })
+      }
+      return user.profilePhoto
+    }
+
+    return null
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-8">
             <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center">
-                {user.profilePhoto ? (
+              <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center overflow-hidden">
+                {getProfileImageUrl() ? (
                   <img
-                    src={user.profilePhoto || "/placeholder.svg"}
+                    src={getProfileImageUrl() || "/placeholder.svg"}
                     alt={user.name}
-                    className="w-full h-full rounded-full object-cover"
+                    className="w-full h-full object-cover"
                   />
                 ) : (
                   <span className="text-2xl font-bold text-blue-600">{user.name?.charAt(0) || "U"}</span>
@@ -331,31 +351,53 @@ const handleSubmit = async (e) => {
                   )}
 
                   <div>
-                    <label htmlFor="profile_photo" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="profilePhoto" className="block text-sm font-medium text-gray-700 mb-2">
                       Update Profile Photo
                     </label>
-                    <div className="relative">
-                      <Upload size={20} className="absolute left-3 top-3 text-gray-400" />
-                      <input
-                        type="file"
-                        id="profile_photo"
-                        onChange={handleFileChange}
-                        accept="image/*"
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                      />
-                    </div>
-                    {profilePhoto && <p className="mt-2 text-sm text-gray-600">Selected: {profilePhoto.name}</p>}
+
+                    {profilePhotoPreview ? (
+                      <div className="flex items-center space-x-4">
+                        <div className="relative">
+                          <img
+                            src={profilePhotoPreview || "/placeholder.svg"}
+                            alt="Profile preview"
+                            className="w-20 h-20 rounded-full object-cover border-2 border-gray-300"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-600 mb-2">Selected: {profilePhoto?.name}</p>
+                          <button
+                            type="button"
+                            onClick={removePhoto}
+                            className="text-red-600 hover:text-red-700 text-sm"
+                          >
+                            Remove Photo
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <Upload size={20} className="absolute left-3 top-3 text-gray-400" />
+                        <input
+                          type="file"
+                          id="profilePhoto"
+                          onChange={handleFileChange}
+                          accept="image/*"
+                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 <div className="flex justify-end">
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={loading || uploadingImage}
                     className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                   >
                     <Save size={16} />
-                    {loading ? "Saving..." : "Save Changes"}
+                    {uploadingImage ? "Uploading..." : loading ? "Saving..." : "Save Changes"}
                   </button>
                 </div>
               </form>
