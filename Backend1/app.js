@@ -32,7 +32,24 @@ console.log('CORS options in use:', corsOptions);
 
 // app.use(cors(corsOptions));
 
-app.use(cors({origin: 'https://connect-us-xi.vercel.app', credentials: true}));
+// const cors = require("cors");
+
+const allowedOrigins = [
+  "https://connect-us-xi.vercel.app",
+//   "http://localhost:3000" // optional for local dev
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+}));
+
 
 // Handle preflight requests
 // app.options('*', cors(corsOptions));
