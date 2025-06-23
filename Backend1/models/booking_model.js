@@ -16,20 +16,8 @@ const bookingSchema = new mongoose.Schema({
         ref: 'Service',
         required: true
     },
-    bookingDate: {
+    scheduledDate: {
         type: Date,
-        required: true
-    },
-    bookingTime: {
-        type: String,
-        required: true
-    },
-    duration: {
-        type: Number,
-        default: 60 // in minutes
-    },
-    totalAmount: {
-        type: Number,
         required: true
     },
     status: {
@@ -37,44 +25,31 @@ const bookingSchema = new mongoose.Schema({
         enum: ['pending', 'approved', 'rejected', 'completed', 'cancelled'],
         default: 'pending'
     },
-    customerAddress: {
-        street: String,
-        city: String,
-        state: String,
-        zipCode: String,
-        coordinates: {
-            lat: Number,
-            lng: Number
-        }
-    },
-    specialRequirements: {
+    notes: {
         type: String,
+        trim: true,
         default: ''
+    },
+    totalAmount: {
+        type: Number,
+        required: true,
+        min: 0
     },
     paymentStatus: {
         type: String,
-        enum: ['pending', 'paid', 'failed', 'refunded'],
+        enum: ['pending', 'paid', 'refunded'],
         default: 'pending'
-    },
-    paymentId: {
-        type: String,
-        default: null
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
     }
+}, {
+    timestamps: true
 });
 
-bookingSchema.pre('save', function(next) {
-    this.updatedAt = Date.now();
-    next();
-});
+// Indexes for better performance
+bookingSchema.index({ customer: 1 });
+bookingSchema.index({ provider: 1 });
+bookingSchema.index({ service: 1 });
+bookingSchema.index({ status: 1 });
+bookingSchema.index({ scheduledDate: 1 });
+bookingSchema.index({ createdAt: -1 });
 
-const Booking = mongoose.model('Booking', bookingSchema);
-
-module.exports = Booking;
+module.exports = mongoose.model('Booking', bookingSchema);

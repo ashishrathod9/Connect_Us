@@ -1,24 +1,24 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateUser } = require('../middleware/authenticateUser');
-const { 
-    createBooking, 
-    getProviderBookings, 
+const { authorizeAdmin } = require('../middleware/authorize');
+const {
+    createBooking,
+    updateBookingStatus,
     getCustomerBookings,
-    updateBookingStatus 
+    getProviderBookings,
+    getAllBookings
 } = require('../Controller/booking');
-const { requireProvider } = require('../middleware/authenticateUser');
 
-// Create a new booking (for customers)
+// Customer routes
 router.post('/', authenticateUser, createBooking);
+router.get('/my-bookings', authenticateUser, getCustomerBookings);
 
-// Get all bookings for the logged-in provider
-router.get('/provider', authenticateUser, requireProvider, getProviderBookings);
+// Provider routes  
+router.get('/provider/bookings', authenticateUser, getProviderBookings);
+router.patch('/:bookingId/status', authenticateUser, updateBookingStatus);
 
-// Get all bookings for the logged-in customer
-router.get('/customer', authenticateUser, getCustomerBookings);
+// Admin routes
+router.get('/all', authenticateUser, authorizeAdmin, getAllBookings);
 
-// Update a booking's status (for providers)
-router.put('/:bookingId/status', authenticateUser, requireProvider, updateBookingStatus);
-
-module.exports = router; 
+module.exports = router;

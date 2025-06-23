@@ -3,6 +3,13 @@ import ApiService from './api'
 class BookingService {
   // Create new booking
   async createBooking(bookingData) {
+    console.log('🎯 Creating booking with data:', bookingData)
+    
+    // Validate required fields on frontend
+    if (!bookingData.serviceId || !bookingData.scheduledDate) {
+      throw new Error('Service ID and scheduled date are required')
+    }
+    
     return await ApiService.request('/bookings', {
       method: 'POST',
       body: JSON.stringify(bookingData)
@@ -31,7 +38,7 @@ class BookingService {
   // Update booking status (for providers)
   async updateBookingStatus(bookingId, status) {
     return await ApiService.request(`/bookings/${bookingId}/status`, {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify({ status })
     })
   }
@@ -46,6 +53,18 @@ class BookingService {
   // Get booking by ID
   async getBookingById(bookingId) {
     return await ApiService.request(`/bookings/${bookingId}`)
+  }
+
+  async getMyBookings() {
+    return await ApiService.request('/bookings/my-bookings')
+  }
+
+  async getProviderBookings() {
+    return await ApiService.request('/bookings/provider/bookings')
+  }
+
+  async getAllBookings() {
+    return await ApiService.request('/bookings/all')
   }
 }
 
