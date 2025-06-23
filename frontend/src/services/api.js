@@ -1,7 +1,6 @@
-// Use the environment variable, fallback to production URL
 const API_BASE_URL =  "https://connect-us-1.onrender.com/api"
 
-console.log('API Base URL:', API_BASE_URL) // Debug log
+console.log('API_BASE_URL:', API_BASE_URL)
 
 class ApiService {
   constructor() {
@@ -25,11 +24,12 @@ class ApiService {
 
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`
-    console.log('Making request to:', url) // Debug log
+    console.log('🚀 Making API request to:', url)
     
     const config = {
       headers: this.getAuthHeaders(),
-      credentials: 'include',
+      // Remove credentials temporarily
+      // credentials: 'include',
       ...options,
     }
 
@@ -43,7 +43,7 @@ class ApiService {
 
       return data
     } catch (error) {
-      console.error('API Request Error:', error)
+      console.error('❌ API Request Error:', error)
       throw error
     }
   }
@@ -55,7 +55,8 @@ class ApiService {
       const response = await fetch(url, {
         method: "POST",
         headers: this.getAuthHeadersForFormData(),
-        credentials: 'include',
+        // Remove credentials temporarily
+        // credentials: 'include',
         body: formData,
       })
 
@@ -67,7 +68,7 @@ class ApiService {
 
       return data
     } catch (error) {
-      console.error('API FormData Request Error:', error)
+      console.error('❌ FormData Request Error:', error)
       throw error
     }
   }

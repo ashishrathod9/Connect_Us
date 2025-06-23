@@ -3,23 +3,25 @@ const mongoose = require('mongoose');
 const serviceCategorySchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true,
+        required: [true, 'Category name is required'],
         trim: true,
-        unique: true
+        unique: true,
+        maxlength: [100, 'Category name cannot exceed 100 characters']
     },
     description: {
         type: String,
-        required: true,
-        trim: true
-    },
-    imageUrl: {
-        type: String,
-        default: null
+        trim: true,
+        maxlength: [500, 'Description cannot exceed 500 characters']
     },
     slug: {
         type: String,
+        required: true,
         unique: true,
         lowercase: true
+    },
+    icon: {
+        type: String,
+        trim: true
     },
     isActive: {
         type: Boolean,
@@ -29,18 +31,9 @@ const serviceCategorySchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Create slug from name before saving
-serviceCategorySchema.pre('save', function(next) {
-    if (this.name && (this.isNew || this.isModified('name'))) {
-        this.slug = this.name
-            .toLowerCase()
-            .trim()
-            .replace(/[^a-zA-Z0-9\s]/g, '') // Remove special characters
-            .replace(/\s+/g, '-') // Replace spaces with hyphens
-            .replace(/-+/g, '-'); // Replace multiple hyphens with single hyphen
-    }
-    next();
-});
+// Index for better performance
+serviceCategorySchema.index({ name: 1 });
+serviceCategorySchema.index({ slug: 1 });
+serviceCategorySchema.index({ isActive: 1 });
 
-const ServiceCategory = mongoose.model('ServiceCategory', serviceCategorySchema);
-module.exports = ServiceCategory;
+module.exports = mongoose.model('ServiceCategory', serviceCategorySchema);

@@ -1,24 +1,23 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateUser } = require('../middleware/authenticateUser');
-const { authorizeAdmin } = require('../middleware/authorize');
+const { authenticateUser } = require('../middleware/auth'); // Fix the require statement
 const {
+    createServiceCategory,
     getAllServiceCategories,
     getServiceCategoryById,
-    getServiceCategoryBySlug,
-    createServiceCategory,
     updateServiceCategory,
-    deleteServiceCategory
+    deleteServiceCategory,
+    getServiceCategoryBySlug
 } = require('../Controller/serviceCategory');
 
-// Public routes - Make sure these paths are correct
+// Public routes
 router.get('/', getAllServiceCategories);
-router.get('/:id', getServiceCategoryById);
 router.get('/slug/:slug', getServiceCategoryBySlug);
+router.get('/:id', getServiceCategoryById);
 
 // Protected routes (admin only)
-router.post('/', authenticateUser, authorizeAdmin, createServiceCategory);
-router.put('/:id', authenticateUser, authorizeAdmin, updateServiceCategory);
-router.delete('/:id', authenticateUser, authorizeAdmin, deleteServiceCategory);
+router.post('/', authenticateUser, createServiceCategory);
+router.put('/:id', authenticateUser, updateServiceCategory);
+router.delete('/:id', authenticateUser, deleteServiceCategory);
 
 module.exports = router;

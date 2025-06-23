@@ -1,6 +1,5 @@
 const ServiceCategory = require('../models/serviceCategory_model');
 
-// Helper function to generate slug
 const generateSlug = (name) => {
     return name
         .toLowerCase()
@@ -13,45 +12,82 @@ const generateSlug = (name) => {
 // Create new service category
 const createServiceCategory = async (req, res) => {
     try {
-        const { name, description, imageUrl } = req.body;
+        const { name, description, icon, isActive } = req.body;
 
-        // Check if category already exists
-        const existingCategory = await ServiceCategory.findOne({ name });
-        if (existingCategory) {
-            return res.status(400).json({ message: 'Service category already exists' });
+        // Validation
+        if (!name) {
+            return res.status(400).json({
+                success: false,
+                message: 'Category name is required'
+            });
         }
 
-        // Generate slug from name
+        // Check if category already exists
+        const existingCategory = await ServiceCategory.findOne({ 
+            name: { $regex: new RegExp(`^${name}$`, 'i') } 
+        });
+
+        if (existingCategory) {
+            return res.status(400).json({
+                success: false,
+                message: 'Category with this name already exists'
+            });
+        }
+
+        // Generate slug
         const slug = generateSlug(name);
 
         const newCategory = new ServiceCategory({
             name,
-            description,
-            imageUrl,
-            slug
+            description: description || '',
+            slug,
+            icon: icon || '',
+            isActive: isActive !== undefined ? isActive : true
         });
 
         await newCategory.save();
-        res.status(201).json({ 
-            message: 'Service category created successfully', 
-            category: newCategory 
+
+        res.status(201).json({
+            success: true,
+            message: 'Service category created successfully',
+            category: newCategory
         });
 
     } catch (error) {
         console.error('Error creating service category:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
     }
 };
 
 // Get all service categories
 const getAllServiceCategories = async (req, res) => {
     try {
-        const categories = await ServiceCategory.find({ isActive: true }).sort({ createdAt: -1 });
-        res.status(200).json({ categories });
+        const { isActive } = req.query;
+        
+        let filter = {};
+        if (isActive !== undefined) {
+            filter.isActive = isActive === 'true';
+        }
+
+        const categories = await ServiceCategory.find(filter)
+            .sort({ name: 1 })
+            .select('name description slug icon isActive createdAt');
+
+        res.status(200).json({
+            success: true,
+            count: categories.length,
+            categories
+        });
 
     } catch (error) {
         console.error('Error fetching service categories:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
     }
 };
 
@@ -59,17 +95,27 @@ const getAllServiceCategories = async (req, res) => {
 const getServiceCategoryById = async (req, res) => {
     try {
         const { id } = req.params;
+
         const category = await ServiceCategory.findById(id);
 
         if (!category) {
-            return res.status(404).json({ message: 'Service category not found' });
+            return res.status(404).json({
+                success: false,
+                message: 'Service category not found'
+            });
         }
 
-        res.status(200).json({ category });
+        res.status(200).json({
+            success: true,
+            category
+        });
 
     } catch (error) {
         console.error('Error fetching service category:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
     }
 };
 
@@ -77,17 +123,27 @@ const getServiceCategoryById = async (req, res) => {
 const getServiceCategoryBySlug = async (req, res) => {
     try {
         const { slug } = req.params;
-        const category = await ServiceCategory.findOne({ slug, isActive: true });
+
+        const category = await ServiceCategory.findOne({ slug });
 
         if (!category) {
-            return res.status(404).json({ message: 'Service category not found' });
+            return res.status(404).json({
+                success: false,
+                message: 'Service category not found'
+            });
         }
 
-        res.status(200).json({ category });
+        res.status(200).json({
+            success: true,
+            category
+        });
 
     } catch (error) {
-        console.error('Error fetching service category:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error('Error fetching service category by slug:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
     }
 };
 
@@ -95,52 +151,70 @@ const getServiceCategoryBySlug = async (req, res) => {
 const updateServiceCategory = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, description, imageUrl, isActive } = req.body;
+        const { name, description, icon, isActive } = req.body;
 
         const category = await ServiceCategory.findById(id);
+
         if (!category) {
-            return res.status(404).json({ message: 'Service category not found' });
+            return res.status(404).json({
+                success: false,
+                message: 'Service category not found'
+            });
         }
 
         // Update fields
         if (name) {
             category.name = name;
-            category.slug = generateSlug(name); // Update slug when name changes
+            category.slug = generateSlug(name);
         }
-        if (description) category.description = description;
-        if (imageUrl !== undefined) category.imageUrl = imageUrl;
+        if (description !== undefined) category.description = description;
+        if (icon !== undefined) category.icon = icon;
         if (isActive !== undefined) category.isActive = isActive;
 
         await category.save();
-        res.status(200).json({ 
-            message: 'Service category updated successfully', 
-            category 
+
+        res.status(200).json({
+            success: true,
+            message: 'Service category updated successfully',
+            category
         });
 
     } catch (error) {
         console.error('Error updating service category:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
     }
 };
 
-// Delete service category (soft delete)
+// Delete service category
 const deleteServiceCategory = async (req, res) => {
     try {
         const { id } = req.params;
 
         const category = await ServiceCategory.findById(id);
+
         if (!category) {
-            return res.status(404).json({ message: 'Service category not found' });
+            return res.status(404).json({
+                success: false,
+                message: 'Service category not found'
+            });
         }
 
-        category.isActive = false;
-        await category.save();
+        await ServiceCategory.findByIdAndDelete(id);
 
-        res.status(200).json({ message: 'Service category deleted successfully' });
+        res.status(200).json({
+            success: true,
+            message: 'Service category deleted successfully'
+        });
 
     } catch (error) {
         console.error('Error deleting service category:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
     }
 };
 
@@ -148,7 +222,7 @@ module.exports = {
     createServiceCategory,
     getAllServiceCategories,
     getServiceCategoryById,
-    getServiceCategoryBySlug,
     updateServiceCategory,
-    deleteServiceCategory
+    deleteServiceCategory,
+    getServiceCategoryBySlug
 };
