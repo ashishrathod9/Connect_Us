@@ -28,7 +28,7 @@ const app = express();
 //     maxAge: 86400
 // };
 
-console.log('CORS options in use:', corsOptions);
+// console.log('CORS options in use:', corsOptions);
 
 // app.use(cors(corsOptions));
 
