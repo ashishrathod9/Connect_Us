@@ -25,9 +25,12 @@ function App() {
           <Navbar />
           <main className="pt-16">
             <Routes>
+              {/* Public Routes */}
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              
+              {/* Protected Service Routes */}
               <Route
                 path="/services"
                 element={
@@ -44,23 +47,8 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <Profile />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute adminOnly>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="*" element={<Navigate to="/" />} />
+              
+              {/* Search and Category Routes */}
               <Route
                 path="/search"
                 element={
@@ -77,6 +65,16 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              
+              {/* User Profile and Dashboard Routes */}
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/dashboard"
                 element={
@@ -85,6 +83,8 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              
+              {/* Service Management Routes */}
               <Route
                 path="/manage"
                 element={
@@ -93,6 +93,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              
               {/* Customer Booking Routes */}
               <Route
                 path="/bookings"
@@ -110,6 +111,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              
               {/* Provider Booking Routes */}
               <Route
                 path="/provider/bookings"
@@ -127,6 +129,19 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              
+              {/* Admin Routes */}
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              
+              {/* Catch-all route - MUST BE LAST */}
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
         </div>
