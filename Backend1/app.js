@@ -13,7 +13,7 @@ app.use(cors({
     'https://connect-us-xi.vercel.app',
     'http://localhost:3000',
     'http://localhost:3001'
-  ],
+  ]
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'],
@@ -51,7 +51,7 @@ const serviceCategoryRoutes = require('./Routes/serviceCategory_routes');
 const serviceRoutes = require('./Routes/service_routes');
 const bookingRoutes = require('./Routes/booking_routes');
 const userRoutes = require('./Routes/user_routes');
-
+const authRoutes = require('./Routes/auth_routes');
 
 // Register routes with correct paths
 app.use('/api/service-categories', serviceCategoryRoutes); // This should match your frontend call
@@ -59,8 +59,7 @@ app.use('/api/categories', serviceCategoryRoutes); // Alternative route
 app.use('/api/services', serviceRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/users', userRoutes);
-
-
+app.use('/api/auth', authRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -95,7 +94,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ 
     success: false, 
     message: 'Something went wrong!',
-    error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+    error: process.process.NODE_ENV === 'development' ? err.message : 'Internal server error'
   });
 });
 
