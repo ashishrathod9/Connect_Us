@@ -30,8 +30,14 @@ const serviceSchema = new mongoose.Schema({
     },
     unit: {
         type: String,
-        enum: ['fixed', 'hourly', 'daily', 'per_item'],
-        default: 'fixed'
+        enum: [
+            'per service',
+            'per hour',
+            'per day',
+            'per project',
+            'per sq ft'
+        ],
+        required: true
     },
     imageUrl: {
         type: String,

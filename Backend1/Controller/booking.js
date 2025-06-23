@@ -60,6 +60,13 @@ const createBooking = async (req, res) => {
 
         // Validate scheduled date
         const scheduledDateTime = new Date(scheduledDate);
+        if (isNaN(scheduledDateTime.getTime())) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid scheduled date format'
+            });
+        }
+
         if (scheduledDateTime <= new Date()) {
             return res.status(400).json({
                 success: false,

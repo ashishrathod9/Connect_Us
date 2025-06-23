@@ -5,33 +5,27 @@ class BookingService {
   async createBooking(bookingData) {
     console.log('🎯 BookingService.createBooking called with:', bookingData)
     
-    // Client-side validation before sending
-    if (!bookingData.scheduledDate) {
-      throw new Error('Scheduled date is required')
-    }
-    
+    // Validate required fields
     if (!bookingData.serviceId) {
-      throw new Error('Service ID is required')
+      throw new Error('Service ID is required');
     }
     
-    // Validate date format and future date
-    const scheduledDate = new Date(bookingData.scheduledDate);
-    if (isNaN(scheduledDate.getTime())) {
-      throw new Error('Invalid date format')
+    if (!bookingData.scheduledDate) {
+      throw new Error('Scheduled date is required');
     }
     
-    if (scheduledDate <= new Date()) {
-      throw new Error('Scheduled date must be in the future')
+    // Ensure scheduledDate is a valid ISO string
+    try {
+      new Date(bookingData.scheduledDate).toISOString()
+    } catch (error) {
+      throw new Error('Invalid scheduled date format');
     }
     
-    console.log('🎯 Sending request to /bookings endpoint...')
+    console.log('🎯 Sending booking request to backend...');
     
     try {
       const response = await ApiService.request('/bookings', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(bookingData)
       })
       
