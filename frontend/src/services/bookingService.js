@@ -1,13 +1,27 @@
 import ApiService from './api'
 
 class BookingService {
-  // Create new booking
+  // Create new booking with enhanced validation
   async createBooking(bookingData) {
     console.log('🎯 BookingService.createBooking called with:', bookingData)
     
-    // Validate data before sending
+    // Client-side validation before sending
     if (!bookingData.scheduledDate) {
       throw new Error('Scheduled date is required')
+    }
+    
+    if (!bookingData.serviceId) {
+      throw new Error('Service ID is required')
+    }
+    
+    // Validate date format and future date
+    const scheduledDate = new Date(bookingData.scheduledDate);
+    if (isNaN(scheduledDate.getTime())) {
+      throw new Error('Invalid date format')
+    }
+    
+    if (scheduledDate <= new Date()) {
+      throw new Error('Scheduled date must be in the future')
     }
     
     console.log('🎯 Sending request to /bookings endpoint...')
@@ -15,6 +29,9 @@ class BookingService {
     try {
       const response = await ApiService.request('/bookings', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(bookingData)
       })
       
@@ -23,12 +40,17 @@ class BookingService {
     } catch (error) {
       console.error('🎯 Booking request failed:', error)
       
-      // Enhanced error logging
+      // Enhanced error handling
       if (error.message.includes('Route not found')) {
         console.error('❌ Booking route not found - check server routing!')
-        console.error('💡 Try: curl http://your-server/api/bookings/test')
+        throw new Error('Booking service is currently unavailable. Please try again later.')
       }
       
+      if (error.message.includes('Scheduled date is required')) {
+        throw new Error('Please select a valid date and time for your booking.')
+      }
+      
+      // Re-throw the original error if it's not a routing issue
       throw error
     }
   }
@@ -49,50 +71,50 @@ class BookingService {
   // Get customer bookings
   async getCustomerBookings(params = {}) {
     const queryString = new URLSearchParams(params).toString()
-    const endpoint = queryString ? `/bookings/customer?${queryString}` : '/bookings/customer'
+    const endpoint = queryString ? `/bookings/my-bookings?${queryString}` : '/bookings/my-bookings'
     return await ApiService.request(endpoint)
   }
 
   // Get provider bookings
   async getProviderBookings(params = {}) {
     const queryString = new URLSearchParams(params).toString()
-    const endpoint = queryString ? `/bookings/provider?${queryString}` : '/bookings/provider'
+    const endpoint = queryString ? `/bookings/provider/bookings?${queryString}` : '/bookings/provider/bookings'
     return await ApiService.request(endpoint)
   }
 
   // Get booking details
   async getBookingDetails(bookingId) {
+    if (!bookingId) {
+      throw new Error('Booking ID is required')
+    }
     return await ApiService.request(`/bookings/${bookingId}`)
   }
 
   // Update booking status (for providers)
   async updateBookingStatus(bookingId, status) {
+    if (!bookingId || !status) {
+      throw new Error('Booking ID and status are required')
+    }
     return await ApiService.request(`/bookings/${bookingId}/status`, {
       method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ status })
     })
   }
 
   // Cancel booking
   async cancelBooking(bookingId) {
+    if (!bookingId) {
+      throw new Error('Booking ID is required')
+    }
     return await ApiService.request(`/bookings/${bookingId}/cancel`, {
       method: 'PUT'
     })
   }
 
-  // Get booking by ID
-  async getBookingById(bookingId) {
-    return await ApiService.request(`/bookings/${bookingId}`)
-  }
-
-  async getMyBookings() {
-    return await ApiService.request('/bookings/my-bookings')
-  }
-
-  async getProviderBookings() {
-    return await ApiService.request('/bookings/provider/bookings')
-  }
-
+  // Get all bookings (admin)
   async getAllBookings() {
     return await ApiService.request('/bookings/all')
   }
