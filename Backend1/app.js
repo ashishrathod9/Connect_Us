@@ -11,8 +11,7 @@ const app = express();
 const corsOptions = {
     origin: [
       'https://connect-us-xi.vercel.app',
-      'http://localhost:3000',
-      'http://localhost:3001'
+      
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -28,6 +27,8 @@ const corsOptions = {
     exposedHeaders: ['Authorization'],
     maxAge: 86400
 };
+
+console.log('CORS options in use:', corsOptions);
 
 app.use(cors(corsOptions));
 
