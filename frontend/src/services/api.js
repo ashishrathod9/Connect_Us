@@ -1,4 +1,7 @@
+// Use the environment variable, fallback to production URL
 const API_BASE_URL = process.env.REACT_APP_API_URL || "https://connect-us-1.onrender.com/api"
+
+console.log('API Base URL:', API_BASE_URL) // Debug log
 
 class ApiService {
   constructor() {
@@ -22,6 +25,8 @@ class ApiService {
 
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`
+    console.log('Making request to:', url) // Debug log
+    
     const config = {
       headers: this.getAuthHeaders(),
       credentials: 'include',
