@@ -1,5 +1,5 @@
 // Use the environment variable, fallback to production URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || "https://connect-us-1.onrender.com/api"
+const API_BASE_URL =  "https://connect-us-1.onrender.com/api"
 
 console.log('API Base URL:', API_BASE_URL) // Debug log
 
