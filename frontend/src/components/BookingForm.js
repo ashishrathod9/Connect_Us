@@ -7,15 +7,25 @@ const BookingForm = ({ service, onSubmit, onCancel }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // Validate date
+
+    if (!formData.scheduledDate) {
+      alert('Scheduled date is required');
+      return;
+    }
+
     const selectedDate = new Date(formData.scheduledDate);
     if (selectedDate <= new Date()) {
       alert('Please select a future date');
       return;
     }
-    
-    onSubmit(formData);
+
+    // Split date and time for backend
+    const [bookingDate, bookingTime] = formData.scheduledDate.split('T');
+    onSubmit({
+      bookingDate,
+      bookingTime: bookingTime ? bookingTime.slice(0, 5) : '', // "HH:MM"
+      notes: formData.notes
+    });
   };
 
   return (
