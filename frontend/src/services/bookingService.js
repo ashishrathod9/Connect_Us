@@ -6,10 +6,6 @@ class BookingService {
     console.log('🎯 BookingService.createBooking called with:', bookingData)
     
     // Validate data before sending
-    if (!bookingData.serviceId) {
-      throw new Error('Service ID is required')
-    }
-    
     if (!bookingData.scheduledDate) {
       throw new Error('Scheduled date is required')
     }
@@ -26,6 +22,26 @@ class BookingService {
       return response
     } catch (error) {
       console.error('🎯 Booking request failed:', error)
+      
+      // Enhanced error logging
+      if (error.message.includes('Route not found')) {
+        console.error('❌ Booking route not found - check server routing!')
+        console.error('💡 Try: curl http://your-server/api/bookings/test')
+      }
+      
+      throw error
+    }
+  }
+
+  // Test connection to booking routes
+  async testBookingConnection() {
+    try {
+      console.log('🧪 Testing booking route connection...')
+      const response = await ApiService.request('/bookings/test')
+      console.log('✅ Booking routes are accessible:', response)
+      return response
+    } catch (error) {
+      console.error('❌ Booking routes test failed:', error)
       throw error
     }
   }

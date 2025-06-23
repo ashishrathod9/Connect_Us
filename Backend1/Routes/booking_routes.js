@@ -20,12 +20,30 @@ router.use((req, res, next) => {
     next();
 });
 
-// Public test route
+// IMPORTANT: Add this test route first to verify routing works
 router.get('/test', (req, res) => {
+    console.log('📋 Test route hit successfully!');
     res.json({ 
         success: true, 
         message: 'Booking routes are working!',
         timestamp: new Date().toISOString()
+    });
+});
+
+// Root route for /api/bookings (this might be missing)
+router.get('/', (req, res) => {
+    console.log('📋 Root booking route hit');
+    res.json({
+        success: true,
+        message: 'Booking API endpoint',
+        availableRoutes: [
+            'GET /api/bookings/test',
+            'POST /api/bookings',
+            'GET /api/bookings/my-bookings',
+            'GET /api/bookings/provider/bookings',
+            'PATCH /api/bookings/:id/status',
+            'GET /api/bookings/all'
+        ]
     });
 });
 
