@@ -51,7 +51,7 @@ const serviceCategoryRoutes = require('./Routes/serviceCategory_routes');
 const serviceRoutes = require('./Routes/service_routes');
 const bookingRoutes = require('./Routes/booking_routes');
 const userRoutes = require('./Routes/user_routes');
-const authRoutes = require('./Routes/auth_routes');
+
 
 // Register routes with correct paths
 app.use('/api/service-categories', serviceCategoryRoutes); // This should match your frontend call
@@ -59,7 +59,6 @@ app.use('/api/categories', serviceCategoryRoutes); // Alternative route
 app.use('/api/services', serviceRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/auth', authRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
