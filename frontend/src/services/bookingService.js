@@ -3,17 +3,31 @@ import ApiService from './api'
 class BookingService {
   // Create new booking
   async createBooking(bookingData) {
-    console.log('🎯 Creating booking with data:', bookingData)
+    console.log('🎯 BookingService.createBooking called with:', bookingData)
     
-    // Validate required fields on frontend
-    if (!bookingData.serviceId || !bookingData.scheduledDate) {
-      throw new Error('Service ID and scheduled date are required')
+    // Validate data before sending
+    if (!bookingData.serviceId) {
+      throw new Error('Service ID is required')
     }
     
-    return await ApiService.request('/bookings', {
-      method: 'POST',
-      body: JSON.stringify(bookingData)
-    })
+    if (!bookingData.scheduledDate) {
+      throw new Error('Scheduled date is required')
+    }
+    
+    console.log('🎯 Sending request to /bookings endpoint...')
+    
+    try {
+      const response = await ApiService.request('/bookings', {
+        method: 'POST',
+        body: JSON.stringify(bookingData)
+      })
+      
+      console.log('🎯 Booking response received:', response)
+      return response
+    } catch (error) {
+      console.error('🎯 Booking request failed:', error)
+      throw error
+    }
   }
 
   // Get customer bookings

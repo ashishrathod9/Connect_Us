@@ -4,18 +4,37 @@ const User = require('../models/user_model');
 
 const createBooking = async (req, res) => {
     try {
+        console.log('📋 Creating booking...');
+        console.log('📋 Request body:', req.body);
+        console.log('📋 User:', req.user ? req.user.id : 'No user');
+
         const { serviceId, scheduledDate, notes } = req.body;
-        const customerId = req.user.id;
+        const customerId = req.user?.id;
 
-        console.log('Creating booking with data:', { serviceId, scheduledDate, notes, customerId });
-
-        // Validate required fields
-        if (!serviceId || !scheduledDate) {
-            return res.status(400).json({
+        // Check if user is authenticated
+        if (!customerId) {
+            return res.status(401).json({
                 success: false,
-                message: 'Service ID and scheduled date are required'
+                message: 'User not authenticated'
             });
         }
+
+        // Validate required fields
+        if (!serviceId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Service ID is required'
+            });
+        }
+
+        if (!scheduledDate) {
+            return res.status(400).json({
+                success: false,
+                message: 'Scheduled date is required'
+            });
+        }
+
+        console.log('📋 Validation passed, finding service...');
 
         // Get service details
         const service = await Service.findById(serviceId).populate('provider');
@@ -26,6 +45,8 @@ const createBooking = async (req, res) => {
             });
         }
 
+        console.log('📋 Service found:', service.name);
+
         // Get customer details
         const customer = await User.findById(customerId);
         if (!customer) {
@@ -35,8 +56,7 @@ const createBooking = async (req, res) => {
             });
         }
 
-        // Skip location validation entirely for now
-        console.log('Skipping location validation - no location inputs required');
+        console.log('📋 Customer found:', customer.name);
 
         // Validate scheduled date
         const scheduledDateTime = new Date(scheduledDate);
@@ -47,7 +67,9 @@ const createBooking = async (req, res) => {
             });
         }
 
-        // Create booking without location restrictions
+        console.log('📋 Creating booking document...');
+
+        // Create booking
         const booking = new Booking({
             customer: customerId,
             provider: service.provider._id,
@@ -60,6 +82,7 @@ const createBooking = async (req, res) => {
         });
 
         await booking.save();
+        console.log('📋 Booking saved with ID:', booking._id);
 
         // Populate booking details for response
         await booking.populate([
@@ -68,7 +91,7 @@ const createBooking = async (req, res) => {
             { path: 'service', select: 'name description basePrice' }
         ]);
 
-        console.log('Booking created successfully:', booking._id);
+        console.log('📋 Booking created successfully');
 
         res.status(201).json({
             success: true,
@@ -77,7 +100,7 @@ const createBooking = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Error creating booking:', error);
+        console.error('📋 Error creating booking:', error);
         res.status(500).json({
             success: false,
             message: 'Internal server error',
@@ -140,67 +163,28 @@ const updateBookingStatus = async (req, res) => {
     try {
         const { bookingId } = req.params;
         const { status } = req.body;
-        const userId = req.user.id;
-
-        console.log('Updating booking status:', { bookingId, status, userId });
+        const providerId = req.user.id;
 
         const booking = await Booking.findById(bookingId);
         if (!booking) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Booking not found' 
-            });
+            return res.status(404).json({ success: false, message: 'Booking not found' });
         }
 
-        // Check if user is either the provider or customer
-        const isProvider = booking.provider.toString() === userId;
-        const isCustomer = booking.customer.toString() === userId;
-
-        if (!isProvider && !isCustomer) {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'You are not authorized to update this booking' 
-            });
+        if (booking.provider.toString() !== providerId) {
+            return res.status(403).json({ success: false, message: 'You are not authorized to update this booking.' });
         }
 
-        // Validate status transitions
-        const validStatuses = ['approved', 'rejected', 'completed', 'cancelled'];
-        if (!validStatuses.includes(status)) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Invalid status provided' 
-            });
-        }
-
-        // Only providers can approve/reject, customers can cancel
-        if ((status === 'approved' || status === 'rejected') && !isProvider) {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'Only providers can approve or reject bookings' 
-            });
+        if (!['approved', 'rejected', 'completed', 'cancelled'].includes(status)) {
+            return res.status(400).json({ success: false, message: 'Invalid status provided.' });
         }
         
         booking.status = status;
         await booking.save();
 
-        await booking.populate([
-            { path: 'customer', select: 'name email phone' },
-            { path: 'provider', select: 'name email phone' },
-            { path: 'service', select: 'name description basePrice' }
-        ]);
-
-        res.status(200).json({ 
-            success: true, 
-            message: `Booking has been ${status}`, 
-            booking 
-        });
-
+        res.status(200).json({ success: true, message: `Booking has been ${status}.`, booking });
     } catch (error) {
         console.error('Error updating booking status:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Internal server error' 
-        });
+        res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
 

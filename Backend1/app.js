@@ -7,7 +7,7 @@ dotenv.config();
 
 const app = express();
 
-// Simple and permissive CORS configuration
+// CORS configuration
 app.use(cors({
   origin: [
     'https://connect-us-xi.vercel.app',
@@ -16,125 +16,102 @@ app.use(cors({
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'],
-  optionsSuccessStatus: 200
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept']
 }));
-
-// Additional middleware for handling preflight requests
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin);
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, X-Requested-With, Accept');
-  
-  // Handle preflight OPTIONS request
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  
-  next();
-});
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Add logging middleware to debug requests
+// Debug middleware
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-  console.log('Origin:', req.headers.origin);
-  console.log('User-Agent:', req.headers['user-agent']);
+  console.log('Headers:', req.headers);
+  console.log('Body:', req.body);
   next();
 });
 
-// Routes
+// Import routes
 const serviceCategoryRoutes = require('./Routes/serviceCategory_routes');
 const serviceRoutes = require('./Routes/service_routes');
-const bookingRoutes = require('./Routes/booking_routes');
+const bookingRoutes = require('./Routes/booking_routes'); // Make sure this exists
 const userRoutes = require('./Routes/user_routes');
 
 
-// Register routes with correct paths
-app.use('/api/service-categories', serviceCategoryRoutes); // This should match your frontend call
-app.use('/api/categories', serviceCategoryRoutes); // Alternative route
+// Register routes
+app.use('/api/service-categories', serviceCategoryRoutes);
+app.use('/api/categories', serviceCategoryRoutes);
 app.use('/api/services', serviceRoutes);
-app.use('/api/bookings', bookingRoutes);
+app.use('/api/bookings', bookingRoutes); // This is crucial!
 app.use('/api/users', userRoutes);
 
-// Health check endpoint
+
+// Health check
 app.get('/health', (req, res) => {
-  res.status(200).json({ 
+  res.json({ 
     status: 'OK', 
-    message: 'ConnectUs Backend Server is running',
-    timestamp: new Date().toISOString(),
-    version: '1.0.0',
-    cors: 'Enabled for Vercel frontend'
+    message: 'Server running',
+    routes: {
+      'service-categories': '/api/service-categories',
+      'services': '/api/services',
+      'bookings': '/api/bookings', // Show this in health check
+      'users': '/api/users'
+    }
   });
 });
 
-// Root endpoint
 app.get('/', (req, res) => {
   res.json({ 
     message: 'ConnectUs API Server',
-    version: '1.0.0',
     status: 'Running',
-    frontend: 'https://connect-us-xi.vercel.app',
-    allowedOrigins: [
-      'https://connect-us-xi.vercel.app',
-      'http://localhost:3000',
-      'http://localhost:3001'
+    availableRoutes: [
+      '/api/service-categories',
+      '/api/services', 
+      '/api/bookings',
+      '/api/users'
     ]
-  });
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Error:', err.message);
-  console.error('Stack:', err.stack);
-  res.status(500).json({ 
-    success: false, 
-    message: 'Something went wrong!',
-    error: process.process.NODE_ENV === 'development' ? err.message : 'Internal server error'
   });
 });
 
 // 404 handler
 app.use('*', (req, res) => {
+  console.log('404 - Route not found:', req.originalUrl);
   res.status(404).json({ 
     success: false, 
-    message: 'Route not found' 
+    message: 'Route not found',
+    requestedRoute: req.originalUrl,
+    availableRoutes: [
+      '/api/service-categories',
+      '/api/services',
+      '/api/bookings',
+      '/api/users'
+    ]
   });
 });
 
-// Database connection
+// Database connection and server start
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
+    await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    console.log('MongoDB Connected');
   } catch (error) {
     console.error('Database connection error:', error);
     process.exit(1);
   }
 };
 
-// Start server
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   await connectDB();
-  
-  app.listen(PORT, '0.0.0.0', () => {
+  app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-    console.log(`Server URL: https://connect-us-1.onrender.com`);
-    console.log(`Frontend URL: https://connect-us-xi.vercel.app`);
-    console.log(`Environment: ${process.env.NODE_ENV}`);
-    console.log('CORS enabled for:', [
-      'https://connect-us-xi.vercel.app',
-      'http://localhost:3000',
-      'http://localhost:3001'
-    ]);
+    console.log('Available routes:');
+    console.log('- /api/bookings (POST, GET)');
+    console.log('- /api/service-categories (GET)');
+    console.log('- /api/services (GET)');
   });
 };
 
