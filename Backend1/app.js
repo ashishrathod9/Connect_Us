@@ -8,32 +8,34 @@ dotenv.config();
 const app = express();
 
 // CORS Configuration
-const corsOptions = {
-    origin: [
-      'https://connect-us-xi.vercel.app',
+// const corsOptions = {
+//     origin: [
+//       'https://connect-us-xi.vercel.app',
       
-    ],
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: [
-      'Origin',
-      'X-Requested-With',
-      'Content-Type',
-      'Accept',
-      'Authorization',
-      'Cache-Control',
-      'Pragma'
-    ],
-    exposedHeaders: ['Authorization'],
-    maxAge: 86400
-};
+//     ],
+//     credentials: true,
+//     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+//     allowedHeaders: [
+//       'Origin',
+//       'X-Requested-With',
+//       'Content-Type',
+//       'Accept',
+//       'Authorization',
+//       'Cache-Control',
+//       'Pragma'
+//     ],
+//     exposedHeaders: ['Authorization'],
+//     maxAge: 86400
+// };
 
 console.log('CORS options in use:', corsOptions);
 
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
+
+app.use(cors({origin: 'https://connect-us-xi.vercel.app', credentials: true}));
 
 // Handle preflight requests
-app.options('*', cors(corsOptions));
+// app.options('*', cors(corsOptions));
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
