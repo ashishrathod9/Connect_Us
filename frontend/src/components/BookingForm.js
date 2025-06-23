@@ -19,11 +19,8 @@ const BookingForm = ({ service, onSubmit, onCancel }) => {
       return;
     }
 
-    // Split date and time for backend
-    const [bookingDate, bookingTime] = formData.scheduledDate.split('T');
     onSubmit({
-      bookingDate,
-      bookingTime: bookingTime ? bookingTime.slice(0, 5) : '', // "HH:MM"
+      scheduledDate: formData.scheduledDate,
       notes: formData.notes
     });
   };

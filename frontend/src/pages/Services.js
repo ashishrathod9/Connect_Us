@@ -205,10 +205,11 @@ const Services = () => {
     setBookingLoading(true)
     setBookingError("")
     try {
+      // Combine date and time into ISO string
+      const scheduledDate = `${bookingDate}T${bookingTime}:00`;
       const bookingData = {
         serviceId: selectedService._id,
-        bookingDate,
-        bookingTime,
+        scheduledDate,
       }
       const response = await BookingService.createBooking(bookingData)
       if (response.success) {
