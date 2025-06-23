@@ -5,6 +5,8 @@ import { Link, useSearchParams } from "react-router-dom"
 import ServiceService from "../services/serviceService"
 import ServiceCategoryService from "../services/serviceCategoryService"
 import { Search, Filter, Star, MapPin, Clock } from "lucide-react"
+import ConnectUsLoader from "../components/ConnectUsLoader"
+import BookingService from "../services/bookingService"
 
 const Services = () => {
   const [services, setServices] = useState([])
@@ -13,6 +15,12 @@ const Services = () => {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("")
   const [searchParams, setSearchParams] = useSearchParams()
+  const [showHireModal, setShowHireModal] = useState(false)
+  const [selectedService, setSelectedService] = useState(null)
+  const [bookingDate, setBookingDate] = useState("")
+  const [bookingTime, setBookingTime] = useState("")
+  const [bookingLoading, setBookingLoading] = useState(false)
+  const [bookingError, setBookingError] = useState("")
 
   useEffect(() => {
     fetchCategories()
@@ -27,6 +35,7 @@ const Services = () => {
 
   const fetchServices = async () => {
     try {
+      const startTime = Date.now()
       setLoading(true)
       const response = await ServiceService.getAllServices()
       console.log("Services API Response:", response)
@@ -42,16 +51,26 @@ const Services = () => {
       }
 
       setServices(servicesData)
+
+      // Ensure minimum 20 second loading time
+      const elapsedTime = Date.now() - startTime
+      const remainingTime = Math.max(0, 20000 - elapsedTime)
+
+      setTimeout(() => {
+        setLoading(false)
+      }, remainingTime)
     } catch (error) {
       console.error("Error fetching services:", error)
       setServices([])
-    } finally {
-      setLoading(false)
+      setTimeout(() => {
+        setLoading(false)
+      }, 20000)
     }
   }
 
   const fetchServicesByCategory = async (categoryId) => {
     try {
+      const startTime = Date.now()
       setLoading(true)
       const response = await ServiceService.getServicesByCategory(categoryId)
       console.log("Category Services API Response:", response)
@@ -67,11 +86,20 @@ const Services = () => {
       }
 
       setServices(servicesData)
+
+      // Ensure minimum 20 second loading time
+      const elapsedTime = Date.now() - startTime
+      const remainingTime = Math.max(0, 20000 - elapsedTime)
+
+      setTimeout(() => {
+        setLoading(false)
+      }, remainingTime)
     } catch (error) {
       console.error("Error fetching services by category:", error)
       setServices([])
-    } finally {
-      setLoading(false)
+      setTimeout(() => {
+        setLoading(false)
+      }, 20000)
     }
   }
 
@@ -102,6 +130,7 @@ const Services = () => {
     if (!searchQuery.trim()) return
 
     try {
+      const startTime = Date.now()
       setLoading(true)
       const response = await ServiceService.searchServices(searchQuery)
       console.log("Search API Response:", response)
@@ -119,11 +148,20 @@ const Services = () => {
       setServices(servicesData)
       setSelectedCategory("")
       setSearchParams({})
+
+      // Ensure minimum 20 second loading time
+      const elapsedTime = Date.now() - startTime
+      const remainingTime = Math.max(0, 20000 - elapsedTime)
+
+      setTimeout(() => {
+        setLoading(false)
+      }, remainingTime)
     } catch (error) {
       console.error("Error searching services:", error)
       setServices([])
-    } finally {
-      setLoading(false)
+      setTimeout(() => {
+        setLoading(false)
+      }, 20000)
     }
   }
 
@@ -144,6 +182,54 @@ const Services = () => {
     setSearchQuery("")
     setSearchParams({})
     fetchServices()
+  }
+
+  const handleOpenHireModal = (service) => {
+    setSelectedService(service)
+    setShowHireModal(true)
+    setBookingDate("")
+    setBookingTime("")
+    setBookingError("")
+  }
+
+  const handleCloseHireModal = () => {
+    setShowHireModal(false)
+    setSelectedService(null)
+    setBookingDate("")
+    setBookingTime("")
+    setBookingError("")
+  }
+
+  const handleHireSubmit = async (e) => {
+    e.preventDefault()
+    setBookingLoading(true)
+    setBookingError("")
+    try {
+      const bookingData = {
+        serviceId: selectedService._id,
+        bookingDate,
+        bookingTime,
+      }
+      const response = await BookingService.createBooking(bookingData)
+      if (response.success) {
+        alert("Booking created successfully! Waiting for provider approval.")
+        handleCloseHireModal()
+      } else {
+        setBookingError(response.message || "Failed to create booking")
+      }
+    } catch (err) {
+      setBookingError(err.response?.data?.message || err.message || "Failed to create booking")
+    } finally {
+      setBookingLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <ConnectUsLoader size="xlarge" showText={true} />
+      </div>
+    )
   }
 
   return (
@@ -217,11 +303,7 @@ const Services = () => {
         </div>
 
         {/* Services Grid */}
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-          </div>
-        ) : services.length === 0 ? (
+        {services.length === 0 ? (
           <div className="text-center py-12">
             <h3 className="text-xl font-semibold text-gray-900 mb-4">No services found</h3>
             <p className="text-gray-600 mb-6">Try adjusting your search criteria or browse all categories.</p>
@@ -305,12 +387,78 @@ const Services = () => {
                       View Details
                     </Link>
                   </div>
+                  <button
+                    onClick={() => handleOpenHireModal(service)}
+                    className="w-full mt-4 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200"
+                  >
+                    Hire Now
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+      {/* Hire Modal */}
+      {showHireModal && selectedService && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Hire Service Provider</h2>
+              <button
+                onClick={handleCloseHireModal}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="mb-4 p-3 bg-gray-50 rounded">
+              <h3 className="font-semibold">{selectedService.name}</h3>
+              <p className="text-sm text-gray-600">Provider: {selectedService.provider?.name}</p>
+              <p className="text-sm text-gray-600">Base Price: ${selectedService.basePrice}/{selectedService.unit}</p>
+            </div>
+            {bookingError && (
+              <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                {bookingError}
+              </div>
+            )}
+            <form onSubmit={handleHireSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Booking Date *
+                </label>
+                <input
+                  type="date"
+                  value={bookingDate}
+                  onChange={e => setBookingDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Booking Time *
+                </label>
+                <input
+                  type="time"
+                  value={bookingTime}
+                  onChange={e => setBookingTime(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={bookingLoading}
+                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200 disabled:opacity-50"
+              >
+                {bookingLoading ? "Booking..." : "Confirm Hire"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

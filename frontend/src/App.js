@@ -13,6 +13,9 @@ import SearchResultPage from "./pages/SearchResultPage"
 import CategoryServices from "./pages/CategoryServices"
 import Dashboard from "./pages/Dashboard"
 import ServiceManagement from "./pages/ServiceManagement"
+import CustomerBookings from "./components/CustomerBookings"
+import ProviderBookings from "./components/ProviderBookings"
+import "./components/ConnectUsLoader.css"
 
 function App() {
   return (
@@ -87,6 +90,40 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <ServiceManagement />
+                  </ProtectedRoute>
+                }
+              />
+              {/* Customer Booking Routes */}
+              <Route
+                path="/bookings"
+                element={
+                  <ProtectedRoute customerOnly>
+                    <CustomerBookings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/customer/bookings"
+                element={
+                  <ProtectedRoute customerOnly>
+                    <CustomerBookings />
+                  </ProtectedRoute>
+                }
+              />
+              {/* Provider Booking Routes */}
+              <Route
+                path="/provider/bookings"
+                element={
+                  <ProtectedRoute providerOnly>
+                    <ProviderBookings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/requests"
+                element={
+                  <ProtectedRoute providerOnly>
+                    <ProviderBookings />
                   </ProtectedRoute>
                 }
               />

@@ -1,3 +1,6 @@
+/* Import the ConnectUs loader styles */
+@import "./components/ConnectUsLoader.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useLocation, Link } from "react-router-dom"
 import AuthService from "../services/authService"
 import { Search, Star, MapPin, Phone, Mail, User, ArrowLeft } from "lucide-react"
+import ConnectUsLoader from "../components/ConnectUsLoader"
 
 const SearchResultPage = () => {
   const [results, setResults] = useState([])
@@ -21,14 +22,24 @@ const SearchResultPage = () => {
 
     const fetchResults = async () => {
       try {
+        const startTime = Date.now()
         setLoading(true)
         const response = await AuthService.searchServices(query)
         setResults(response || [])
+
+        // Ensure minimum 20 second loading time
+        const elapsedTime = Date.now() - startTime
+        const remainingTime = Math.max(0, 20000 - elapsedTime)
+
+        setTimeout(() => {
+          setLoading(false)
+        }, remainingTime)
       } catch (err) {
         setError("An error occurred while searching.")
         console.error(err)
-      } finally {
-        setLoading(false)
+        setTimeout(() => {
+          setLoading(false)
+        }, 20000)
       }
     }
 
@@ -38,7 +49,7 @@ const SearchResultPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        <ConnectUsLoader size="large" showText={true} />
       </div>
     )
   }

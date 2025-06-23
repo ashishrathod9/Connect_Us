@@ -13,6 +13,18 @@ const createBooking = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Service not found' });
         }
 
+        // Fetch customer and provider
+        const customer = await User.findById(customerId);
+        const provider = await User.findById(service.provider);
+        if (!customer || !provider) {
+            return res.status(404).json({ success: false, message: 'Customer or provider not found' });
+        }
+
+        // Check if addresses match
+        if ((customer.address || '').trim().toLowerCase() !== (provider.address || '').trim().toLowerCase()) {
+            return res.status(400).json({ success: false, message: 'Locations do not match. You can only hire providers in your location.' });
+        }
+
         const newBooking = new Booking({
             service: serviceId,
             customer: customerId,

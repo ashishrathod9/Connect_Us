@@ -37,7 +37,7 @@ class AuthService {
   }
 
   async requestProviderStatus() {
-    return await ApiService.request("/users/request/provider", {
+    return await ApiService.request("/users/request-provider", {
       method: "POST",
     })
   }

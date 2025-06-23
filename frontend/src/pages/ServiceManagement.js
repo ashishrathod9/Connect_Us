@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react"
 import AuthService from "../services/authService"
 import { useAuth } from "../context/AuthContext"
-import { Plus, Edit, Trash2, Settings, Grid } from "lucide-react"
+import { Plus, Edit, Trash2, Settings, Grid } from 'lucide-react'
 import Modal from "../components/common/Modal"
 import CategoryForm from "../components/forms/CategoryForm"
 import ServiceForm from "../components/forms/ServiceForm"
-import ServiceService from "../services/serviceService"
+import ConnectUsLoader from "../components/ConnectUsLoader"
 
 const ServiceManagement = () => {
   const { user } = useAuth()
@@ -24,42 +24,72 @@ const ServiceManagement = () => {
 
   const fetchAllData = async () => {
     try {
+      const startTime = Date.now()
       setLoading(true)
-      const [categoriesResponse, servicesResponse] = await Promise.all([
+
+      console.log("Fetching categories and services...")
+
+      const [categoriesData, servicesData] = await Promise.all([
         AuthService.getServiceCategories(),
-        ServiceService.getAllServices(),
+        AuthService.getAllServices(),
       ])
 
-      console.log("Categories Response:", categoriesResponse)
-      console.log("Services Response:", servicesResponse)
+      console.log("Raw categories response:", categoriesData)
+      console.log("Raw services response:", servicesData)
 
-      // Handle categories response structure
-      let categoriesData = []
-      if (categoriesResponse?.categories && Array.isArray(categoriesResponse.categories)) {
-        categoriesData = categoriesResponse.categories
-      } else if (Array.isArray(categoriesResponse)) {
-        categoriesData = categoriesResponse
-      } else if (categoriesResponse?.data && Array.isArray(categoriesResponse.data)) {
-        categoriesData = categoriesResponse.data
-      }
+      // Ensure we always set arrays
+      const safeCategoriesData = Array.isArray(categoriesData) 
+        ? categoriesData 
+        : (categoriesData?.categories || categoriesData?.data || [])
+      
+      const safeServicesData = Array.isArray(servicesData) 
+        ? servicesData 
+        : (servicesData?.services || servicesData?.data || [])
 
-      // Handle services response structure
-      let servicesData = []
-      if (servicesResponse?.services && Array.isArray(servicesResponse.services)) {
-        servicesData = servicesResponse.services
-      } else if (Array.isArray(servicesResponse)) {
-        servicesData = servicesResponse
-      } else if (servicesResponse?.data && Array.isArray(servicesResponse.data)) {
-        servicesData = servicesResponse.data
-      }
+      console.log("Safe categories:", safeCategoriesData)
+      console.log("Safe services:", safeServicesData)
 
-      setCategories(categoriesData)
-      setServices(servicesData)
+      setCategories(safeCategoriesData)
+      setServices(safeServicesData)
+
+      // Ensure minimum 3 second loading time (reduced for better UX)
+      const elapsedTime = Date.now() - startTime
+      const remainingTime = Math.max(0, 3000 - elapsedTime)
+
+      setTimeout(() => {
+        setLoading(false)
+      }, remainingTime)
     } catch (err) {
       setError("Failed to fetch data. Please try again.")
-      console.error("Fetch error:", err)
-    } finally {
-      setLoading(false)
+      console.error("Error fetching data:", err)
+      // Set empty arrays on error
+      setCategories([])
+      setServices([])
+      setTimeout(() => {
+        setLoading(false)
+      }, 3000)
+    }
+  }
+
+  // Separate function to fetch only categories
+  const fetchCategories = async () => {
+    try {
+      console.log("Fetching categories for service form...")
+      const categoriesData = await AuthService.getServiceCategories()
+      console.log("Categories response for service form:", categoriesData)
+      
+      const safeCategoriesData = Array.isArray(categoriesData) 
+        ? categoriesData 
+        : (categoriesData?.categories || categoriesData?.data || [])
+      
+      console.log("Safe categories for service form:", safeCategoriesData)
+      setCategories(safeCategoriesData)
+      return safeCategoriesData
+    } catch (err) {
+      console.error("Error fetching categories:", err)
+      setError("Failed to fetch categories.")
+      setCategories([])
+      return []
     }
   }
 
@@ -91,6 +121,7 @@ const ServiceManagement = () => {
     setFormIsLoading(true)
     setError("")
     try {
+      console.log("Submitting service with data:", formData)
       if (editingService) {
         await AuthService.updateService(editingService._id, formData)
       } else {
@@ -101,7 +132,7 @@ const ServiceManagement = () => {
       await fetchAllData()
     } catch (err) {
       setError("Failed to save service.")
-      console.error(err)
+      console.error("Service submit error:", err)
     } finally {
       setFormIsLoading(false)
     }
@@ -138,18 +169,30 @@ const ServiceManagement = () => {
     setIsCategoryModalOpen(true)
   }
 
-  const openServiceModal = (service = null) => {
+  const openServiceModal = async (service = null) => {
     setEditingService(service)
+
+    // Ensure we have fresh categories when opening service modal
+    if (!Array.isArray(categories) || categories.length === 0) {
+      console.log("No categories found, fetching fresh categories...")
+      await fetchCategories()
+    }
+
+    console.log("Opening service modal with categories:", categories)
     setIsServiceModalOpen(true)
   }
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        <ConnectUsLoader />
       </div>
     )
   }
+
+  // Ensure categories is always an array for rendering
+  const safeCategories = Array.isArray(categories) ? categories : []
+  const safeServices = Array.isArray(services) ? services : []
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -161,13 +204,24 @@ const ServiceManagement = () => {
 
         {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">{error}</div>}
 
+        {/* Debug Info - Remove this in production */}
+        <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded mb-6">
+          <p>
+            <strong>Debug Info:</strong>
+          </p>
+          <p>Categories loaded: {safeCategories.length} (Type: {typeof categories})</p>
+          <p>Services loaded: {safeServices.length} (Type: {typeof services})</p>
+          <p>User role: {user?.role}</p>
+          <p>Categories is array: {Array.isArray(categories) ? "Yes" : "No"}</p>
+        </div>
+
         {/* Categories Section */}
         <div className="mb-8">
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center">
                 <Grid size={24} className="text-blue-600 mr-3" />
-                <h2 className="text-2xl font-semibold text-gray-900">Service Categories</h2>
+                <h2 className="text-2xl font-semibold text-gray-900">Service Categories ({safeCategories.length})</h2>
               </div>
               {user && user.role === "admin" && (
                 <button
@@ -180,11 +234,11 @@ const ServiceManagement = () => {
               )}
             </div>
 
-            {categories.length > 0 ? (
+            {safeCategories.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {categories.map((category) => (
+                {safeCategories.map((category) => (
                   <div
-                    key={category._id}
+                    key={category._id || category.id}
                     className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
                   >
                     <div className="flex justify-between items-start mb-2">
@@ -198,7 +252,7 @@ const ServiceManagement = () => {
                             <Edit size={16} />
                           </button>
                           <button
-                            onClick={() => handleDeleteCategory(category._id)}
+                            onClick={() => handleDeleteCategory(category._id || category.id)}
                             className="text-red-600 hover:text-red-800 transition-colors"
                           >
                             <Trash2 size={16} />
@@ -212,7 +266,15 @@ const ServiceManagement = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 text-center py-8">No categories found</p>
+              <div className="text-center py-8">
+                <p className="text-gray-500 mb-4">No categories found</p>
+                <button
+                  onClick={fetchCategories}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Refresh Categories
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -223,7 +285,7 @@ const ServiceManagement = () => {
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center">
                 <Settings size={24} className="text-blue-600 mr-3" />
-                <h2 className="text-2xl font-semibold text-gray-900">Services</h2>
+                <h2 className="text-2xl font-semibold text-gray-900">Services ({safeServices.length})</h2>
               </div>
               {user && (user.role === "admin" || user.role === "provider") && (
                 <button
@@ -236,11 +298,11 @@ const ServiceManagement = () => {
               )}
             </div>
 
-            {services.length > 0 ? (
+            {safeServices.length > 0 ? (
               <div className="space-y-4">
-                {services.map((service) => (
+                {safeServices.map((service) => (
                   <div
-                    key={service._id}
+                    key={service._id || service.id}
                     className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
                   >
                     <div className="flex justify-between items-start">
@@ -254,25 +316,21 @@ const ServiceManagement = () => {
                         <p className="text-gray-600 text-sm mb-2">{service.description}</p>
                         <div className="flex items-center gap-4 text-sm text-gray-500">
                           <span>
-                            Price: ${service.basePrice || service.price || "N/A"}
-                            {service.unit && service.unit !== "fixed" ? ` ${service.unit}` : " (fixed)"}
+                            Price: ${service.basePrice || service.price || "N/A"} {service.unit || ""}
                           </span>
                           {service.provider && <span>Provider: {service.provider.name}</span>}
-                          {service.duration && <span>Duration: {service.duration} min</span>}
                         </div>
                       </div>
                       <div className="flex gap-2">
                         <button
                           onClick={() => openServiceModal(service)}
                           className="text-blue-600 hover:text-blue-800 transition-colors"
-                          title="Edit Service"
                         >
                           <Edit size={16} />
                         </button>
                         <button
-                          onClick={() => handleDeleteService(service._id)}
+                          onClick={() => handleDeleteService(service._id || service.id)}
                           className="text-red-600 hover:text-red-800 transition-colors"
-                          title="Delete Service"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -310,7 +368,7 @@ const ServiceManagement = () => {
           <ServiceForm
             onSubmit={handleServiceSubmit}
             service={editingService}
-            categories={categories}
+            categories={safeCategories}
             isLoading={formIsLoading}
           />
         </Modal>

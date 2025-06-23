@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import ServiceService from "../services/serviceService"
-import { Star, MapPin, Clock, Phone, Mail, ArrowLeft, Calendar } from 'lucide-react'
+import BookingService from "../services/bookingService"
+import { Star, MapPin, Clock, Phone, Mail, ArrowLeft, Calendar } from "lucide-react"
+import ConnectUsLoader from "../components/ConnectUsLoader"
 
 const ServiceDetails = () => {
   const { id } = useParams()
@@ -11,7 +13,11 @@ const ServiceDetails = () => {
   const [service, setService] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [showHireModal, setShowHireModal] = useState(false)
+  const [bookingDate, setBookingDate] = useState("")
+  const [bookingTime, setBookingTime] = useState("")
   const [bookingLoading, setBookingLoading] = useState(false)
+  const [bookingError, setBookingError] = useState("")
 
   useEffect(() => {
     fetchService()
@@ -19,29 +25,69 @@ const ServiceDetails = () => {
 
   const fetchService = async () => {
     try {
+      const startTime = Date.now()
       setLoading(true)
       const response = await ServiceService.getServiceById(id)
       setService(response)
+
+      // Ensure minimum 20 second loading time
+      const elapsedTime = Date.now() - startTime
+      const remainingTime = Math.max(0, 20000 - elapsedTime)
+
+      setTimeout(() => {
+        setLoading(false)
+      }, remainingTime)
     } catch (error) {
       setError("Service not found")
       console.error("Error fetching service:", error)
-    } finally {
-      setLoading(false)
+      setTimeout(() => {
+        setLoading(false)
+      }, 5000)
     }
   }
 
-  const handleHireProvider = async () => {
+  const handleOpenHireModal = () => {
+    setShowHireModal(true)
+    setBookingDate("")
+    setBookingTime("")
+    setBookingError("")
+  }
+
+  const handleCloseHireModal = () => {
+    setShowHireModal(false)
+    setBookingDate("")
+    setBookingTime("")
+    setBookingError("")
+  }
+
+  const handleHireSubmit = async (e) => {
+    e.preventDefault()
     setBookingLoading(true)
-    setTimeout(() => {
-      alert("Hire request sent! The provider will contact you soon.")
+    setBookingError("")
+    try {
+      const bookingData = {
+        serviceId: service._id,
+        bookingDate,
+        bookingTime,
+      }
+      const response = await BookingService.createBooking(bookingData)
+      if (response.success) {
+        alert("Booking created successfully! Waiting for provider approval.")
+        handleCloseHireModal()
+      } else {
+        setBookingError(response.message || "Failed to create booking")
+      }
+    } catch (err) {
+      setBookingError(err.response?.data?.message || err.message || "Failed to create booking")
+    } finally {
       setBookingLoading(false)
-    }, 2000)
+    }
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <ConnectUsLoader size="large" showText={true} />
       </div>
     )
   }
@@ -173,7 +219,7 @@ const ServiceDetails = () => {
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (
-                      <span className="text-gray-600 font-semibold">{service.provider?.name?.charAt(0) || "P"}</span>
+                      <span className="text-gray-600 font-semibold">{(service.provider?.name || "P").charAt(0)}</span>
                     )}
                   </div>
                   <div>
@@ -195,11 +241,10 @@ const ServiceDetails = () => {
               </div>
 
               <button
-                onClick={handleHireProvider}
-                disabled={bookingLoading}
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mb-4"
+                onClick={handleOpenHireModal}
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors mb-4"
               >
-                {bookingLoading ? "Sending Request..." : "Hire Provider"}
+                Hire Provider
               </button>
 
               <p className="text-xs text-gray-500 text-center">
@@ -217,6 +262,66 @@ const ServiceDetails = () => {
           </div>
         </div>
       </div>
+      {/* Hire Modal */}
+      {showHireModal && service && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Hire Service Provider</h2>
+              <button
+                onClick={handleCloseHireModal}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="mb-4 p-3 bg-gray-50 rounded">
+              <h3 className="font-semibold">{service.name}</h3>
+              <p className="text-sm text-gray-600">Provider: {service.provider?.name}</p>
+              <p className="text-sm text-gray-600">Base Price: ${service.price || service.basePrice}/{service.unit}</p>
+            </div>
+            {bookingError && (
+              <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                {bookingError}
+              </div>
+            )}
+            <form onSubmit={handleHireSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Booking Date *
+                </label>
+                <input
+                  type="date"
+                  value={bookingDate}
+                  onChange={e => setBookingDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Booking Time *
+                </label>
+                <input
+                  type="time"
+                  value={bookingTime}
+                  onChange={e => setBookingTime(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={bookingLoading}
+                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200 disabled:opacity-50"
+              >
+                {bookingLoading ? "Booking..." : "Confirm Hire"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

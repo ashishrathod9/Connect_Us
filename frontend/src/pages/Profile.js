@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext"
 import AuthService from "../services/authService"
 import CloudinaryService from "../services/cloudinary"
 import { User, Mail, Phone, MapPin, Edit, Save, X, Upload } from "lucide-react"
+import ConnectUsLoader from "../components/ConnectUsLoader"
 
 const Profile = () => {
   const { user, updateUser } = useAuth()
@@ -148,8 +149,8 @@ const Profile = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <ConnectUsLoader size="large" showText={true} />
       </div>
     )
   }
@@ -185,7 +186,7 @@ const Profile = () => {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-2xl font-bold text-blue-600">{user.name?.charAt(0) || "U"}</span>
+                  <span className="text-2xl font-bold text-blue-600">{(user.name || "U").charAt(0)}</span>
                 )}
               </div>
               <div className="text-center md:text-left flex-1">

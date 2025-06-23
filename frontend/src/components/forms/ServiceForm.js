@@ -1,128 +1,180 @@
-import React, { useState, useEffect } from 'react';
+"use client"
+
+import { useState, useEffect } from "react"
 
 const ServiceForm = ({ onSubmit, service, categories, isLoading }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    basePrice: '',
-    unit: 'fixed',
-    category: '',
-  });
+    name: "",
+    description: "",
+    category: "",
+    basePrice: "",
+    unit: "per service",
+  })
+
+  // Ensure categories is always an array
+  const safeCategories = Array.isArray(categories) ? categories : []
+
+  // Debug logging
+  useEffect(() => {
+    console.log("ServiceForm received categories:", categories)
+    console.log("ServiceForm safe categories:", safeCategories)
+    console.log("Categories type:", typeof categories)
+    console.log("Is categories array?", Array.isArray(categories))
+  }, [categories, safeCategories])
 
   useEffect(() => {
     if (service) {
       setFormData({
-        name: service.name || '',
-        description: service.description || '',
-        basePrice: service.basePrice || '',
-        unit: service.unit || 'fixed',
-        category: service.category?._id || '',
-      });
+        name: service.name || "",
+        description: service.description || "",
+        category: service.category?._id || service.category || "",
+        basePrice: service.basePrice || service.price || "",
+        unit: service.unit || "per service",
+      })
     } else {
+      // Reset form for new service
       setFormData({
-        name: '',
-        description: '',
-        basePrice: '',
-        unit: 'fixed',
-        category: categories.length > 0 ? categories[0]._id : '',
-      });
+        name: "",
+        description: "",
+        category: "",
+        basePrice: "",
+        unit: "per service",
+      })
     }
-  }, [service, categories]);
+  }, [service])
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+    const { name, value } = e.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(formData);
-  };
+    e.preventDefault()
+    console.log("ServiceForm submitting:", formData)
+    onSubmit(formData)
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Debug Info - Remove in production */}
+      <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-3 py-2 rounded text-sm">
+        <p>
+          <strong>Debug:</strong> Categories available: {safeCategories.length}
+        </p>
+        <p>Categories type: {typeof categories}</p>
+        <p>Is array: {Array.isArray(categories) ? "Yes" : "No"}</p>
+        {safeCategories.length === 0 && <p className="text-red-600">⚠️ No categories loaded!</p>}
+      </div>
+
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700">Service Name</label>
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+          Service Name *
+        </label>
         <input
+          type="text"
           id="name"
           name="name"
-          type="text"
           value={formData.name}
           onChange={handleChange}
-          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
           required
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Enter service name"
         />
       </div>
+
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+          Description *
+        </label>
         <textarea
           id="description"
           name="description"
           value={formData.description}
           onChange={handleChange}
-          rows="3"
-          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
           required
+          rows={3}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Enter service description"
         />
       </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="basePrice" className="block text-sm font-medium text-gray-700">Price</label>
-          <input
-            id="basePrice"
-            name="basePrice"
-            type="number"
-            value={formData.basePrice}
-            onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="unit" className="block text-sm font-medium text-gray-700">Unit</label>
-          <select
-            id="unit"
-            name="unit"
-            value={formData.unit}
-            onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
-            required
-          >
-            <option value="per hour">Per Hour</option>
-            <option value="fixed">Fixed</option>
-            <option value="per square foot">Per Square Foot</option>
-            <option value="per item">Per Item</option>
-            <option value="per day">Per Day</option>
-            <option value="per visit">Per Visit</option>
-          </select>
-        </div>
-      </div>
+
       <div>
-        <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category</label>
+        <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+          Category *
+        </label>
         <select
           id="category"
           name="category"
           value={formData.category}
           onChange={handleChange}
-          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
           required
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          {categories.map(cat => (
-            <option key={cat._id} value={cat._id}>{cat.name}</option>
+          <option value="">Select a category</option>
+          {safeCategories.map((category) => (
+            <option key={category._id || category.id} value={category._id || category.id}>
+              {category.name}
+            </option>
           ))}
         </select>
+        {safeCategories.length === 0 && (
+          <p className="text-red-500 text-sm mt-1">No categories available. Please create categories first.</p>
+        )}
       </div>
-      <div className="flex justify-end">
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="basePrice" className="block text-sm font-medium text-gray-700 mb-1">
+            Base Price *
+          </label>
+          <input
+            type="number"
+            id="basePrice"
+            name="basePrice"
+            value={formData.basePrice}
+            onChange={handleChange}
+            required
+            min="0"
+            step="0.01"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="0.00"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="unit" className="block text-sm font-medium text-gray-700 mb-1">
+            Unit
+          </label>
+          <select
+            id="unit"
+            name="unit"
+            value={formData.unit}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="per service">per service</option>
+            <option value="per hour">per hour</option>
+            <option value="per day">per day</option>
+            <option value="per project">per project</option>
+            <option value="per sq ft">per sq ft</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="flex justify-end space-x-3 pt-4">
         <button
           type="submit"
-          disabled={isLoading}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          disabled={isLoading || safeCategories.length === 0}
+          className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? 'Saving...' : 'Save Service'}
+          {isLoading ? "Saving..." : service ? "Update Service" : "Create Service"}
         </button>
       </div>
     </form>
-  );
-};
+  )
+}
 
-export default ServiceForm; 
+export default ServiceForm

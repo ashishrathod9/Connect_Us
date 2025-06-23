@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
 import AuthService from "../services/authService"
 import { Check, X, Clock, RefreshCw, Calendar, User, DollarSign } from "lucide-react"
+import ConnectUsLoader from "../components/ConnectUsLoader"
 
 const Dashboard = () => {
   const { user } = useAuth()
@@ -16,6 +17,7 @@ const Dashboard = () => {
 
   const fetchBookings = async () => {
     try {
+      const startTime = Date.now()
       setLoading(true)
       const response = isProvider ? await AuthService.getProviderHires() : await AuthService.getCustomerHires()
 
@@ -24,11 +26,20 @@ const Dashboard = () => {
       } else {
         setBookings(response.bookings || response || [])
       }
+
+      // Ensure minimum 20 second loading time
+      const elapsedTime = Date.now() - startTime
+      const remainingTime = Math.max(0, 20000 - elapsedTime)
+
+      setTimeout(() => {
+        setLoading(false)
+      }, remainingTime)
     } catch (err) {
       setError("An error occurred while fetching hires.")
       console.error(err)
-    } finally {
-      setLoading(false)
+      setTimeout(() => {
+        setLoading(false)
+      }, 20000)
     }
   }
 
@@ -174,7 +185,7 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        <ConnectUsLoader size="large" showText={true} />
       </div>
     )
   }

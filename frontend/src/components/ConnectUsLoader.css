@@ -1,0 +1,1874 @@
+/* Central Hub Pulse Animation */
+.connect-us-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
+  }
+}
+
+/* Text Fade Animation */
+.connect-us-text-fade {
+  animation: textFade 3s ease-in-out infinite;
+}
+
+@keyframes textFade {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Tool Orbit Animations */
+.tool-orbit {
+  animation: orbit 8s linear infinite;
+  width: 100%;
+  height: 100%;
+}
+
+.tool-orbit-1 {
+  animation-delay: 0s;
+}
+
+.tool-orbit-2 {
+  animation-delay: -2s;
+}
+
+.tool-orbit-3 {
+  animation-delay: -4s;
+}
+
+.tool-orbit-4 {
+  animation-delay: -6s;
+}
+
+@keyframes orbit {
+  0% {
+    transform: rotate(0deg) translateX(100px) rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg) translateX(100px) rotate(-360deg);
+  }
+}
+
+/* Tool Glow Effect */
+.tool-glow {
+  animation: toolGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes toolGlow {
+  0% {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4), 0 0 30px currentColor;
+  }
+}
+
+/* Tool Rotation */
+.tool-rotate {
+  animation: toolRotate 4s ease-in-out infinite;
+}
+
+@keyframes toolRotate {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(90deg);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
+  75% {
+    transform: rotate(270deg);
+  }
+}
+
+/* Connection Lines */
+.connection-line {
+  position: absolute;
+  width: 2px;
+  height: 80px;
+  background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.6), transparent);
+  transform-origin: bottom center;
+  animation: connectionPulse 2s ease-in-out infinite;
+}
+
+.connection-line-1 {
+  transform: rotate(0deg);
+  animation-delay: 0s;
+}
+
+.connection-line-2 {
+  transform: rotate(90deg);
+  animation-delay: 0.5s;
+}
+
+.connection-line-3 {
+  transform: rotate(180deg);
+  animation-delay: 1s;
+}
+
+.connection-line-4 {
+  transform: rotate(270deg);
+  animation-delay: 1.5s;
+}
+
+@keyframes connectionPulse {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: rotate(var(--rotation, 0deg)) scaleY(0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: rotate(var(--rotation, 0deg)) scaleY(1);
+  }
+}
+
+/* Sparkling Effects */
+.sparkle {
+  animation: sparkle 1.5s ease-in-out infinite;
+}
+
+.sparkle-1 {
+  animation-delay: 0s;
+}
+.sparkle-2 {
+  animation-delay: 0.3s;
+}
+.sparkle-3 {
+  animation-delay: 0.6s;
+}
+.sparkle-4 {
+  animation-delay: 0.9s;
+}
+
+@keyframes sparkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Loading Text Animation */
+.loading-text {
+  animation: fadeInOut 3s ease-in-out infinite;
+}
+
+@keyframes fadeInOut {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Loading Dots Animation */
+.loading-dots span {
+  animation: loadingDots 1.5s ease-in-out infinite;
+}
+
+.loading-dots span:nth-child(1) {
+  animation-delay: 0s;
+}
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes loadingDots {
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-10px);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .tool-orbit {
+    animation: orbitMobile 8s linear infinite;
+  }
+
+  @keyframes orbitMobile {
+    0% {
+      transform: rotate(0deg) translateX(70px) rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg) translateX(70px) rotate(-360deg);
+    }
+  }
+
+  .connection-line {
+    height: 60px;
+  }
+}
+
+/* Smooth transitions for better performance */
+* {
+  will-change: transform, opacity;
+}
+
+/* Hardware acceleration */
+.tool-orbit,
+.connect-us-pulse,
+.connection-line,
+.sparkle {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Main Gear Rotation */
+.main-gear {
+  animation: mainGearRotate 4s linear infinite;
+}
+
+@keyframes mainGearRotate {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* Secondary Gears */
+.secondary-gear-1 {
+  animation: secondaryGear1 3s linear infinite reverse;
+}
+
+.secondary-gear-2 {
+  animation: secondaryGear2 5s linear infinite;
+}
+
+@keyframes secondaryGear1 {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes secondaryGear2 {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Gear Shadows and Depth */
+.gear-shadow {
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.3), 0 4px 8px
+    rgba(0, 0, 0, 0.4);
+}
+
+/* Robotic Arms Animation */
+.arm-1 {
+  animation: arm1Work 6s ease-in-out infinite;
+}
+
+.arm-2 {
+  animation: arm2Work 8s ease-in-out infinite;
+}
+
+@keyframes arm1Work {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-15deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+  75% {
+    transform: rotate(-5deg);
+  }
+}
+
+@keyframes arm2Work {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(20deg);
+  }
+  40% {
+    transform: rotate(-10deg);
+  }
+  60% {
+    transform: rotate(15deg);
+  }
+  80% {
+    transform: rotate(-5deg);
+  }
+}
+
+/* Arm Segments */
+.arm-segment-1 {
+  transform-origin: bottom center;
+  animation: armSegment1 4s ease-in-out infinite;
+}
+
+.arm-segment-2 {
+  transform-origin: bottom center;
+  animation: armSegment2 3s ease-in-out infinite;
+}
+
+.arm-segment-3 {
+  transform-origin: bottom center;
+  animation: armSegment3 5s ease-in-out infinite;
+}
+
+.arm-segment-4 {
+  transform-origin: bottom center;
+  animation: armSegment4 4s ease-in-out infinite;
+}
+
+@keyframes armSegment1 {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(30deg);
+  }
+}
+
+@keyframes armSegment2 {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-45deg);
+  }
+}
+
+@keyframes armSegment3 {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-20deg);
+  }
+}
+
+@keyframes armSegment4 {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(35deg);
+  }
+}
+
+/* Tool Animations */
+.tool-wrench {
+  animation: wrenchWork 2s ease-in-out infinite;
+}
+
+.tool-screwdriver {
+  animation: screwdriverWork 1.5s ease-in-out infinite;
+}
+
+@keyframes wrenchWork {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(15deg);
+  }
+  75% {
+    transform: rotate(-15deg);
+  }
+}
+
+@keyframes screwdriverWork {
+  0%,
+  100% {
+    transform: rotate(0deg) translateY(0px);
+  }
+  50% {
+    transform: rotate(180deg) translateY(-2px);
+  }
+}
+
+/* Sparks Animation */
+.spark {
+  animation: sparkFly 1s ease-out infinite;
+  opacity: 0;
+}
+
+.spark-1 {
+  animation-delay: 0s;
+}
+.spark-2 {
+  animation-delay: 0.2s;
+}
+.spark-3 {
+  animation-delay: 0.4s;
+}
+.spark-4 {
+  animation-delay: 0.6s;
+}
+.spark-5 {
+  animation-delay: 0.8s;
+}
+.spark-6 {
+  animation-delay: 1s;
+}
+
+@keyframes sparkFly {
+  0% {
+    opacity: 0;
+    transform: scale(0) translate(0, 0);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1) translate(0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.5) translate(20px, -20px);
+  }
+}
+
+/* Oil Drops */
+.oil-drop {
+  width: 4px;
+  height: 6px;
+  background: linear-gradient(to bottom, #1a1a1a, #000);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  animation: oilDrop 3s ease-in-out infinite;
+}
+
+.oil-drop-1 {
+  animation-delay: 0s;
+}
+.oil-drop-2 {
+  animation-delay: 1.5s;
+}
+
+@keyframes oilDrop {
+  0%,
+  90%,
+  100% {
+    opacity: 0;
+    transform: translateY(0px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+  80% {
+    opacity: 0.7;
+    transform: translateY(20px);
+  }
+}
+
+/* Progress Bar */
+.progress-bar {
+  animation: progressFill 8s ease-in-out infinite;
+}
+
+@keyframes progressFill {
+  0% {
+    width: 0%;
+  }
+  50% {
+    width: 75%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+/* Status Lights */
+.status-light-1 {
+  animation: statusBlink1 2s ease-in-out infinite;
+}
+
+.status-light-2 {
+  animation: statusBlink2 3s ease-in-out infinite;
+}
+
+.status-light-3 {
+  animation: statusBlink3 4s ease-in-out infinite;
+}
+
+@keyframes statusBlink1 {
+  0%,
+  50%,
+  100% {
+    opacity: 0.3;
+  }
+  25% {
+    opacity: 1;
+    box-shadow: 0 0 10px currentColor;
+  }
+}
+
+@keyframes statusBlink2 {
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+  }
+  30% {
+    opacity: 1;
+    box-shadow: 0 0 10px currentColor;
+  }
+}
+
+@keyframes statusBlink3 {
+  0%,
+  70%,
+  100% {
+    opacity: 0.3;
+  }
+  35% {
+    opacity: 1;
+    box-shadow: 0 0 10px currentColor;
+  }
+}
+
+/* Loading Text */
+.repair-status {
+  animation: statusText 4s ease-in-out infinite;
+}
+
+@keyframes statusText {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+    color: #00ff88;
+  }
+}
+
+/* Loading Dots */
+.loading-dots span {
+  animation: loadingDots 1.5s ease-in-out infinite;
+}
+
+.loading-dots span:nth-child(1) {
+  animation-delay: 0s;
+}
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes loadingDots {
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+  }
+  30% {
+    opacity: 1;
+  }
+}
+
+/* Circuit Pattern Animation */
+.circuit-pattern {
+  animation: circuitPulse 3s ease-in-out infinite;
+}
+
+@keyframes circuitPulse {
+  0%,
+  100% {
+    opacity: 0.05;
+  }
+  50% {
+    opacity: 0.15;
+  }
+}
+
+/* Arm Base Glow */
+.arm-base {
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  animation: baseGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes baseGlow {
+  0% {
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+  }
+}
+
+/* Performance Optimizations */
+.main-gear,
+.secondary-gear-1,
+.secondary-gear-2,
+.robotic-arm,
+.spark,
+.oil-drop {
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .relative.w-80.h-80 {
+    width: 280px;
+    height: 280px;
+  }
+
+  .robotic-arm {
+    transform: scale(0.8);
+  }
+}
+
+/* Loading Ring Animation */
+.loader-container {
+  position: relative;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.5);
+  animation: containerPulse 4s ease-in-out infinite;
+}
+
+@keyframes containerPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.5);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.8);
+  }
+}
+
+/* Loading Ring Animation */
+.loading-ring {
+  animation: spin 3s linear infinite;
+  filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.3));
+}
+
+.inner-ring {
+  animation: spin 2s linear infinite reverse;
+  filter: drop-shadow(0 0 5px rgba(168, 85, 247, 0.3));
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Worker Base Styles */
+.worker {
+  opacity: 0;
+  transform: scale(0.7) rotate(-15deg);
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.worker-content {
+  animation: workerFloat 2s ease-in-out infinite;
+}
+
+@keyframes workerFloat {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+/* Enhanced Worker Animations - 8 workers, each appears for 1 second */
+.worker-1 {
+  animation: workerShow 8s ease-in-out infinite;
+  animation-delay: 0s;
+}
+
+.worker-2 {
+  animation: workerShow 8s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.worker-3 {
+  animation: workerShow 8s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+.worker-4 {
+  animation: workerShow 8s ease-in-out infinite;
+  animation-delay: 3s;
+}
+
+.worker-5 {
+  animation: workerShow 8s ease-in-out infinite;
+  animation-delay: 4s;
+}
+
+.worker-6 {
+  animation: workerShow 8s ease-in-out infinite;
+  animation-delay: 5s;
+}
+
+.worker-7 {
+  animation: workerShow 8s ease-in-out infinite;
+  animation-delay: 6s;
+}
+
+.worker-8 {
+  animation: workerShow 8s ease-in-out infinite;
+  animation-delay: 7s;
+}
+
+@keyframes workerShow {
+  0%,
+  10%,
+  100% {
+    opacity: 0;
+    transform: scale(0.7) rotate(-15deg);
+  }
+  2%,
+  8% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* Worker Avatar Enhancements */
+.worker-avatar {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  animation: avatarGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes avatarGlow {
+  0% {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+  100% {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), 0 0 20px currentColor;
+  }
+}
+
+.pulse-effect {
+  animation: pulseInner 1.5s ease-in-out infinite;
+}
+
+@keyframes pulseInner {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+/* Enhanced Tool Animations */
+.worker-1 .tool-animation {
+  animation: toolRotate 1.5s ease-in-out infinite;
+}
+
+.worker-2 .tool-animation {
+  animation: toolHammer 1s ease-in-out infinite;
+}
+
+.worker-3 .tool-animation {
+  animation: toolSpark 0.8s ease-in-out infinite;
+}
+
+.worker-4 .tool-animation {
+  animation: toolSaw 1.2s ease-in-out infinite;
+}
+
+.worker-5 .tool-animation {
+  animation: toolClean 1.3s ease-in-out infinite;
+}
+
+.worker-6 .tool-animation {
+  animation: toolPaint 1.8s ease-in-out infinite;
+}
+
+.worker-7 .tool-animation {
+  animation: toolGrow 2s ease-in-out infinite;
+}
+
+.worker-8 .tool-animation {
+  animation: toolCook 1.6s ease-in-out infinite;
+}
+
+@keyframes toolRotate {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes toolHammer {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-3px) rotate(-15deg);
+  }
+  50% {
+    transform: translateY(2px) rotate(15deg);
+  }
+}
+
+@keyframes toolSpark {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: brightness(1) drop-shadow(0 0 5px gold);
+  }
+  50% {
+    transform: scale(1.2);
+    filter: brightness(1.5) drop-shadow(0 0 15px gold);
+  }
+}
+
+@keyframes toolSaw {
+  0%,
+  100% {
+    transform: translateX(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateX(-2px) rotate(-5deg);
+  }
+  75% {
+    transform: translateX(2px) rotate(5deg);
+  }
+}
+
+@keyframes toolClean {
+  0%,
+  100% {
+    transform: translateX(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateX(-3px) rotate(-10deg);
+  }
+  66% {
+    transform: translateX(3px) rotate(10deg);
+  }
+}
+
+@keyframes toolPaint {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(-15deg) scale(1.1);
+  }
+  75% {
+    transform: rotate(15deg) scale(1.1);
+  }
+}
+
+@keyframes toolGrow {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.2) rotate(10deg);
+  }
+}
+
+@keyframes toolCook {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-10deg) scale(1.1);
+  }
+  75% {
+    transform: rotate(10deg) scale(1.1);
+  }
+}
+
+/* Particle Effects */
+.particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+  border-radius: 50%;
+  animation: particleFloat 3s ease-in-out infinite;
+}
+
+.particle-1 {
+  top: 20%;
+  left: 15%;
+  animation-delay: 0s;
+}
+
+.particle-2 {
+  top: 30%;
+  right: 20%;
+  animation-delay: 0.5s;
+}
+
+.particle-3 {
+  bottom: 25%;
+  left: 25%;
+  animation-delay: 1s;
+}
+
+.particle-4 {
+  bottom: 35%;
+  right: 15%;
+  animation-delay: 1.5s;
+}
+
+.particle-5 {
+  top: 50%;
+  left: 10%;
+  animation-delay: 2s;
+}
+
+.particle-6 {
+  top: 60%;
+  right: 10%;
+  animation-delay: 2.5s;
+}
+
+@keyframes particleFloat {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(0px) scale(0);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(-5px) scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(-10px) scale(1);
+  }
+}
+
+/* Progress Bar */
+.progress-fill {
+  animation: progressFill 8s ease-in-out infinite;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+
+@keyframes progressFill {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+/* Enhanced Worker Labels */
+.worker-label {
+  position: absolute;
+  opacity: 0;
+  transform: translateX(-50%) translateY(10px);
+  left: 50%;
+  font-weight: 600;
+  color: #374151;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.label-1 {
+  animation: labelShow 8s ease-in-out infinite;
+  animation-delay: 0s;
+}
+
+.label-2 {
+  animation: labelShow 8s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.label-3 {
+  animation: labelShow 8s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+.label-4 {
+  animation: labelShow 8s ease-in-out infinite;
+  animation-delay: 3s;
+}
+
+.label-5 {
+  animation: labelShow 8s ease-in-out infinite;
+  animation-delay: 4s;
+}
+
+.label-6 {
+  animation: labelShow 8s ease-in-out infinite;
+  animation-delay: 5s;
+}
+
+.label-7 {
+  animation: labelShow 8s ease-in-out infinite;
+  animation-delay: 6s;
+}
+
+.label-8 {
+  animation: labelShow 8s ease-in-out infinite;
+  animation-delay: 7s;
+}
+
+@keyframes labelShow {
+  0%,
+  10%,
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  2%,
+  8% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0px);
+  }
+}
+
+/* Status Dots */
+.status-dot {
+  animation: statusPulse 8s ease-in-out infinite;
+  box-shadow: 0 0 10px currentColor;
+}
+
+.status-1 {
+  animation-delay: 0s;
+}
+.status-2 {
+  animation-delay: 1s;
+}
+.status-3 {
+  animation-delay: 2s;
+}
+.status-4 {
+  animation-delay: 3s;
+}
+.status-5 {
+  animation-delay: 4s;
+}
+.status-6 {
+  animation-delay: 5s;
+}
+.status-7 {
+  animation-delay: 6s;
+}
+.status-8 {
+  animation-delay: 7s;
+}
+
+@keyframes statusPulse {
+  0%,
+  10%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  2%,
+  8% {
+    opacity: 1;
+    transform: scale(1.3);
+    box-shadow: 0 0 15px currentColor;
+  }
+}
+
+/* Enhanced Loading Dots */
+.dot-1 {
+  animation: dotBounce 1.5s ease-in-out infinite;
+  animation-delay: 0s;
+}
+
+.dot-2 {
+  animation: dotBounce 1.5s ease-in-out infinite;
+  animation-delay: 0.2s;
+}
+
+.dot-3 {
+  animation: dotBounce 1.5s ease-in-out infinite;
+  animation-delay: 0.4s;
+}
+
+@keyframes dotBounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.6;
+  }
+  30% {
+    transform: translateY(-12px) scale(1.2);
+    opacity: 1;
+  }
+}
+
+/* Connection Status Animation */
+.connection-status {
+  animation: statusBlink 2s ease-in-out infinite;
+}
+
+.worker-count {
+  animation: countUpdate 8s ease-in-out infinite;
+}
+
+@keyframes statusBlink {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+    color: #10b981;
+  }
+}
+
+@keyframes countUpdate {
+  0% {
+    opacity: 0.5;
+  }
+  12.5% {
+    opacity: 1;
+    color: #3b82f6;
+  }
+  25% {
+    opacity: 1;
+    color: #10b981;
+  }
+  37.5% {
+    opacity: 1;
+    color: #f59e0b;
+  }
+  50% {
+    opacity: 1;
+    color: #ef4444;
+  }
+  62.5% {
+    opacity: 1;
+    color: #8b5cf6;
+  }
+  75% {
+    opacity: 1;
+    color: #06b6d4;
+  }
+  87.5% {
+    opacity: 1;
+    color: #84cc16;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+
+/* Floating Icons */
+.floating-icons {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.floating-icon {
+  position: absolute;
+  font-size: 1.5rem;
+  opacity: 0;
+  animation: floatUp 6s ease-in-out infinite;
+}
+
+.icon-1 {
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.icon-2 {
+  left: 20%;
+  animation-delay: 1s;
+}
+
+.icon-3 {
+  left: 80%;
+  animation-delay: 2s;
+}
+
+.icon-4 {
+  left: 70%;
+  animation-delay: 3s;
+}
+
+.icon-5 {
+  left: 30%;
+  animation-delay: 4s;
+}
+
+.icon-6 {
+  left: 90%;
+  animation-delay: 5s;
+}
+
+@keyframes floatUp {
+  0% {
+    bottom: -50px;
+    opacity: 0;
+    transform: translateX(0px) rotate(0deg);
+  }
+  10% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateX(20px) rotate(180deg);
+  }
+  90% {
+    opacity: 0.3;
+  }
+  100% {
+    bottom: 100vh;
+    opacity: 0;
+    transform: translateX(-20px) rotate(360deg);
+  }
+}
+
+/* Hover Effects */
+.loader-container:hover {
+  transform: scale(1.05);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .w-28.h-28 {
+    width: 100px;
+    height: 100px;
+  }
+
+  .text-3xl {
+    font-size: 1.5rem;
+  }
+
+  .w-10.h-10 {
+    width: 32px;
+    height: 32px;
+  }
+
+  .w-5.h-5 {
+    width: 16px;
+    height: 16px;
+  }
+
+  .floating-icon {
+    font-size: 1.2rem;
+  }
+}
+
+/* Performance Optimizations */
+.worker,
+.loading-ring,
+.inner-ring,
+.worker-label,
+.particle,
+.floating-icon {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Smooth Transitions */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Additional Visual Effects */
+.worker-avatar {
+  position: relative;
+  overflow: hidden;
+}
+
+.worker-avatar::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  50% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+}
+
+/* Loading Container */
+.loader-container {
+  position: relative;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.5);
+  animation: containerPulse 4s ease-in-out infinite;
+}
+
+@keyframes containerPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.5);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.8);
+  }
+}
+
+/* Worker Base Styles */
+.worker {
+  opacity: 0;
+  transform: scale(0.7) rotate(-15deg);
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.worker-content {
+  animation: workerFloat 2s ease-in-out infinite;
+}
+
+@keyframes workerFloat {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+/* Worker Animations - 12 workers, each appears for 0.8 seconds */
+.worker-1 {
+  animation: workerShow 12s ease-in-out infinite;
+  animation-delay: 0s;
+}
+
+.worker-2 {
+  animation: workerShow 12s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.worker-3 {
+  animation: workerShow 12s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+.worker-4 {
+  animation: workerShow 12s ease-in-out infinite;
+  animation-delay: 3s;
+}
+
+.worker-5 {
+  animation: workerShow 12s ease-in-out infinite;
+  animation-delay: 4s;
+}
+
+.worker-6 {
+  animation: workerShow 12s ease-in-out infinite;
+  animation-delay: 5s;
+}
+
+.worker-7 {
+  animation: workerShow 12s ease-in-out infinite;
+  animation-delay: 6s;
+}
+
+.worker-8 {
+  animation: workerShow 12s ease-in-out infinite;
+  animation-delay: 7s;
+}
+
+.worker-9 {
+  animation: workerShow 12s ease-in-out infinite;
+  animation-delay: 8s;
+}
+
+.worker-10 {
+  animation: workerShow 12s ease-in-out infinite;
+  animation-delay: 9s;
+}
+
+.worker-11 {
+  animation: workerShow 12s ease-in-out infinite;
+  animation-delay: 10s;
+}
+
+.worker-12 {
+  animation: workerShow 12s ease-in-out infinite;
+  animation-delay: 11s;
+}
+
+@keyframes workerShow {
+  0%,
+  6.67%,
+  100% {
+    opacity: 0;
+    transform: scale(0.7) rotate(-15deg);
+  }
+  1.67%,
+  5% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* Worker Avatar Enhancements */
+.worker-avatar {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  animation: avatarGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes avatarGlow {
+  0% {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+  100% {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), 0 0 20px currentColor;
+  }
+}
+
+.pulse-effect {
+  animation: pulseInner 1.5s ease-in-out infinite;
+}
+
+@keyframes pulseInner {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+/* Enhanced Tool Animations */
+.worker-1 .tool-animation {
+  animation: toolConstruction 1.5s ease-in-out infinite;
+}
+
+.worker-2 .tool-animation {
+  animation: toolSpark 0.8s ease-in-out infinite;
+}
+
+.worker-3 .tool-animation {
+  animation: toolRotate 1.5s ease-in-out infinite;
+}
+
+.worker-4 .tool-animation {
+  animation: toolSaw 1.2s ease-in-out infinite;
+}
+
+.worker-5 .tool-animation {
+  animation: toolDrive 2s ease-in-out infinite;
+}
+
+.worker-6 .tool-animation {
+  animation: toolClean 1.3s ease-in-out infinite;
+}
+
+.worker-7 .tool-animation {
+  animation: toolMechanic 1.8s ease-in-out infinite;
+}
+
+.worker-8 .tool-animation {
+  animation: toolHVAC 2.2s ease-in-out infinite;
+}
+
+.worker-9 .tool-animation {
+  animation: toolPaint 1.8s ease-in-out infinite;
+}
+
+.worker-10 .tool-animation {
+  animation: toolGrow 2s ease-in-out infinite;
+}
+
+.worker-11 .tool-animation {
+  animation: toolSecurity 1.6s ease-in-out infinite;
+}
+
+.worker-12 .tool-animation {
+  animation: toolWarehouse 1.4s ease-in-out infinite;
+}
+
+@keyframes toolConstruction {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(-10deg) scale(1.1);
+  }
+  75% {
+    transform: rotate(10deg) scale(1.1);
+  }
+}
+
+@keyframes toolSpark {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: brightness(1) drop-shadow(0 0 5px gold);
+  }
+  50% {
+    transform: scale(1.2);
+    filter: brightness(1.5) drop-shadow(0 0 15px gold);
+  }
+}
+
+@keyframes toolRotate {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes toolSaw {
+  0%,
+  100% {
+    transform: translateX(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateX(-2px) rotate(-5deg);
+  }
+  75% {
+    transform: translateX(2px) rotate(5deg);
+  }
+}
+
+@keyframes toolDrive {
+  0%,
+  100% {
+    transform: translateX(0px);
+  }
+  50% {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes toolClean {
+  0%,
+  100% {
+    transform: translateX(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateX(-3px) rotate(-10deg);
+  }
+  66% {
+    transform: translateX(3px) rotate(10deg);
+  }
+}
+
+@keyframes toolMechanic {
+  0%,
+  100% {
+    transform: rotate(0deg) translateY(0px);
+  }
+  25% {
+    transform: rotate(-15deg) translateY(-2px);
+  }
+  50% {
+    transform: rotate(15deg) translateY(2px);
+  }
+}
+
+@keyframes toolHVAC {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.1) rotate(10deg);
+    filter: brightness(1.2);
+  }
+}
+
+@keyframes toolPaint {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(-15deg) scale(1.1);
+  }
+  75% {
+    transform: rotate(15deg) scale(1.1);
+  }
+}
+
+@keyframes toolGrow {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.2) rotate(10deg);
+  }
+}
+
+@keyframes toolSecurity {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.1);
+    filter: brightness(1.2) drop-shadow(0 0 10px rgba(99, 102, 241, 0.5));
+  }
+}
+
+@keyframes toolWarehouse {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-2px) rotate(-5deg);
+  }
+  75% {
+    transform: translateY(2px) rotate(5deg);
+  }
+}
+
+/* Particle Effects inside circle only */
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+  border-radius: 50%;
+  animation: particleFloat 3s ease-in-out infinite;
+}
+
+.particle-1 {
+  top: 25%;
+  left: 20%;
+  animation-delay: 0s;
+}
+
+.particle-2 {
+  top: 30%;
+  right: 25%;
+  animation-delay: 1s;
+}
+
+.particle-3 {
+  bottom: 30%;
+  left: 30%;
+  animation-delay: 2s;
+}
+
+.particle-4 {
+  bottom: 25%;
+  right: 20%;
+  animation-delay: 1.5s;
+}
+
+@keyframes particleFloat {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(0px) scale(0);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(-6px) scale(1);
+  }
+}
+
+/* Loading Dots Animation */
+.dot-1 {
+  animation: dotBounce 1.5s ease-in-out infinite;
+  animation-delay: 0s;
+}
+
+.dot-2 {
+  animation: dotBounce 1.5s ease-in-out infinite;
+  animation-delay: 0.2s;
+}
+
+.dot-3 {
+  animation: dotBounce 1.5s ease-in-out infinite;
+  animation-delay: 0.4s;
+}
+
+@keyframes dotBounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.6;
+  }
+  30% {
+    transform: translateY(-8px) scale(1.2);
+    opacity: 1;
+  }
+}
+
+/* Hover Effects */
+.loader-container:hover {
+  transform: scale(1.05);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .w-32.h-32 {
+    width: 112px;
+    height: 112px;
+  }
+
+  .text-2xl {
+    font-size: 1.25rem;
+  }
+
+  .w-8.h-8 {
+    width: 28px;
+    height: 28px;
+  }
+
+  .w-4.h-4 {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* Performance Optimizations */
+.worker,
+.worker-content,
+.particle {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Smooth Transitions */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Additional Visual Effects */
+.worker-avatar {
+  position: relative;
+  overflow: hidden;
+}
+
+.worker-avatar::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  50% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+}
+
+/* Remove any conflicting styles */
+.worker * {
+  pointer-events: none;
+}
+
+/* Ensure proper stacking */
+.worker {
+  z-index: 1;
+}
+
+/* Clean background */
+.loader-container {
+  border: 3px solid #e5e7eb;
+}

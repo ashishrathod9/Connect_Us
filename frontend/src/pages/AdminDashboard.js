@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import AuthService from "../services/authService"
 import { Users, UserCheck, Clock, CheckCircle, XCircle, Eye } from "lucide-react"
 import TestProviderRequest from "../components/layout/Testprovider"
+import ConnectUsLoader from "../components/ConnectUsLoader"
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview")
@@ -20,6 +21,7 @@ const AdminDashboard = () => {
 
   const fetchData = async () => {
     try {
+      const startTime = Date.now()
       setLoading(true)
       console.log("Fetching admin data...")
 
@@ -36,11 +38,20 @@ const AdminDashboard = () => {
       setCustomers(customersData)
       setProviders(providersData)
       setApplications(applicationsData)
+
+      // Ensure minimum 5 second loading time
+      const elapsedTime = Date.now() - startTime
+      const remainingTime = Math.max(0, 20000 - elapsedTime)
+
+      setTimeout(() => {
+        setLoading(false)
+      }, remainingTime)
     } catch (error) {
       setError("Failed to fetch data")
       console.error("Error fetching admin data:", error)
-    } finally {
-      setLoading(false)
+      setTimeout(() => {
+        setLoading(false)
+      }, 5000)
     }
   }
 
@@ -189,7 +200,7 @@ const AdminDashboard = () => {
                             className="w-full h-full rounded-full object-cover"
                           />
                         ) : (
-                          <span className="text-gray-600 font-semibold">{customer.name?.charAt(0) || "U"}</span>
+                          <span className="text-gray-600 font-semibold">{(customer.name || "U").charAt(0)}</span>
                         )}
                       </div>
                       <span className="text-gray-900">{customer.name}</span>
@@ -247,7 +258,7 @@ const AdminDashboard = () => {
                             className="w-full h-full rounded-full object-cover"
                           />
                         ) : (
-                          <span className="text-gray-600 font-semibold">{provider.name?.charAt(0) || "P"}</span>
+                          <span className="text-gray-600 font-semibold">{(provider.name || "P").charAt(0)}</span>
                         )}
                       </div>
                       <span className="text-gray-900">{provider.name}</span>
@@ -294,7 +305,7 @@ const AdminDashboard = () => {
                       className="w-full h-full rounded-full object-cover"
                     />
                   ) : (
-                    <span className="text-gray-600 font-semibold">{application.name?.charAt(0) || "A"}</span>
+                    <span className="text-gray-600 font-semibold">{(application.name || "A").charAt(0)}</span>
                   )}
                 </div>
                 <div>
@@ -353,8 +364,8 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <ConnectUsLoader size="large" showText={true} />
       </div>
     )
   }
