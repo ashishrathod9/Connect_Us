@@ -93,7 +93,7 @@ app.get('/', (req, res) => {
         services: '/api/services',
         bookings: '/api/bookings',
         users: '/api/users',
-        auth: '/api/auth'
+        // auth: '/api/auth'
       }
     });
 });
