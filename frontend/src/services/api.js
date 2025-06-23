@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3000/api"
+const API_BASE_URL = process.env.REACT_APP_API_URL || "https://connect-us-1.onrender.com/api"
 
 class ApiService {
   constructor() {
@@ -24,6 +24,7 @@ class ApiService {
     const url = `${this.baseURL}${endpoint}`
     const config = {
       headers: this.getAuthHeaders(),
+      credentials: 'include',
       ...options,
     }
 
@@ -37,6 +38,7 @@ class ApiService {
 
       return data
     } catch (error) {
+      console.error('API Request Error:', error)
       throw error
     }
   }
@@ -48,6 +50,7 @@ class ApiService {
       const response = await fetch(url, {
         method: "POST",
         headers: this.getAuthHeadersForFormData(),
+        credentials: 'include',
         body: formData,
       })
 
@@ -59,6 +62,7 @@ class ApiService {
 
       return data
     } catch (error) {
+      console.error('API FormData Request Error:', error)
       throw error
     }
   }

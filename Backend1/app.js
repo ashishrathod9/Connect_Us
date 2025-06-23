@@ -2,98 +2,127 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const path = require('path');
 
-// Load environment variables
 dotenv.config();
 
 const app = express();
 
-// Middleware
-app.use(cors({
-    origin: 'http://localhost:3001',
+// CORS Configuration
+const corsOptions = {
+    origin: [
+      'https://connect-us-xi.vercel.app',
+      'http://localhost:3000',
+      'http://localhost:3001'
+    ],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    maxAge: 86400 // Cache preflight requests for 24 hours
-}));
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: [
+      'Origin',
+      'X-Requested-With',
+      'Content-Type',
+      'Accept',
+      'Authorization',
+      'Cache-Control',
+      'Pragma'
+    ],
+    exposedHeaders: ['Authorization'],
+    maxAge: 86400
+};
+
+app.use(cors(corsOptions));
+
+// Handle preflight requests
+app.options('*', cors(corsOptions));
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Static files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// Import routes
-const userRoutes = require('./Routes/user_routes');
+// Routes
 const serviceCategoryRoutes = require('./Routes/serviceCategory_routes');
 const serviceRoutes = require('./Routes/service_routes');
 const bookingRoutes = require('./Routes/booking_routes');
+const userRoutes = require('./Routes/user_routes');
+const authRoutes = require('./Routes/auth_routes');
 
-// Use routes with proper prefixes
-app.use('/api/users', userRoutes);
-app.use('/api/service-categories', serviceCategoryRoutes);
+app.use('/api/categories', serviceCategoryRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/auth', authRoutes);
 
-// Health check route
-app.get('/api/health', (req, res) => {
+// Health check endpoint
+app.get('/health', (req, res) => {
     res.status(200).json({ 
-        success: true,
-        message: 'Server is running!',
-        timestamp: new Date().toISOString()
+      status: 'OK', 
+      message: 'ConnectUs Backend Server is running',
+      timestamp: new Date().toISOString(),
+      version: '1.0.0'
     });
 });
 
-// Root route
+// Root endpoint
 app.get('/', (req, res) => {
-    res.status(200).json({ 
-        success: true,
-        message: 'Connect Us API Server',
-        version: '1.0.0'
+    res.json({ 
+      message: 'ConnectUs API Server',
+      version: '1.0.0',
+      status: 'Running',
+      endpoints: {
+        health: '/health',
+        api: '/api',
+        categories: '/api/categories',
+        services: '/api/services',
+        bookings: '/api/bookings',
+        users: '/api/users',
+        auth: '/api/auth'
+      }
     });
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error('Error:', err.stack);
+    console.error(err.stack);
     res.status(500).json({ 
-        success: false,
-        message: 'Something went wrong!',
-        error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+      success: false, 
+      message: 'Something went wrong!',
+      error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
     });
 });
 
 // 404 handler
 app.use('*', (req, res) => {
     res.status(404).json({ 
-        success: false,
-        message: `Route ${req.originalUrl} not found` 
+      success: false, 
+      message: 'Route not found' 
     });
 });
 
 // Database connection
 const connectDB = async () => {
     try {
-        const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/connect_us', {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
-        console.log(`MongoDB Connected: ${conn.connection.host}`);
+      const conn = await mongoose.connect(process.env.MONGODB_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      });
+      console.log(`MongoDB Connected: ${conn.connection.host}`);
     } catch (error) {
-        console.error('MongoDB connection error:', error);
-        process.exit(1);
+      console.error('Database connection error:', error);
+      process.exit(1);
     }
 };
 
-// Connect to database
-connectDB();
+// Start server
+const PORT = process.env.PORT || 5000;
 
-const PORT = process.env.PORT || 3000;
+const startServer = async () => {
+    await connectDB();
+  
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server running on port ${PORT}`);
+      console.log(`Server URL: https://connect-us-1.onrender.com`);
+      console.log(`Environment: ${process.env.NODE_ENV}`);
+    });
+};
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-});
+startServer();
 
 module.exports = app;
