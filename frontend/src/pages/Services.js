@@ -21,6 +21,7 @@ const Services = () => {
   const [bookingTime, setBookingTime] = useState("")
   const [bookingLoading, setBookingLoading] = useState(false)
   const [bookingError, setBookingError] = useState("")
+  const [bookingNotes, setBookingNotes] = useState("")
 
   useEffect(() => {
     fetchCategories()
@@ -163,6 +164,7 @@ const Services = () => {
     setBookingDate("")
     setBookingTime("")
     setBookingError("")
+    setBookingNotes("")
   }
 
   const handleCloseHireModal = () => {
@@ -171,28 +173,43 @@ const Services = () => {
     setBookingDate("")
     setBookingTime("")
     setBookingError("")
+    setBookingNotes("")
   }
 
   const handleHireSubmit = async (e) => {
     e.preventDefault()
     setBookingLoading(true)
     setBookingError("")
+    
     try {
-      // Combine date and time into ISO string
-      const scheduledDate = `${bookingDate}T${bookingTime}:00`;
+      console.log('Form data received:', {
+        serviceId: selectedService._id,
+        scheduledDate: `${bookingDate}T${bookingTime}:00`,
+        notes: bookingNotes || ''
+      })
+      
+      // Prepare booking data without location
       const bookingData = {
         serviceId: selectedService._id,
-        scheduledDate,
+        scheduledDate: `${bookingDate}T${bookingTime}:00`,
+        notes: bookingNotes || ''
       }
+
+      console.log('Sending booking data:', bookingData)
+      
       const response = await BookingService.createBooking(bookingData)
+      
+      console.log('Booking response:', response)
+      
       if (response.success) {
-        alert("Booking created successfully! Waiting for provider approval.")
+        alert('Booking created successfully! Waiting for provider approval.')
         handleCloseHireModal()
       } else {
         setBookingError(response.message || "Failed to create booking")
       }
-    } catch (err) {
-      setBookingError(err.response?.data?.message || err.message || "Failed to create booking")
+    } catch (error) {
+      console.error('Booking creation failed:', error)
+      setBookingError(error.message || "Failed to create booking")
     } finally {
       setBookingLoading(false)
     }
@@ -419,6 +436,16 @@ const Services = () => {
                   value={bookingTime}
                   onChange={e => setBookingTime(e.target.value)}
                   required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Booking Notes
+                </label>
+                <textarea
+                  value={bookingNotes}
+                  onChange={e => setBookingNotes(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>

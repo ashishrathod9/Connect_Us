@@ -36,6 +36,16 @@ class ServiceService {
       method: "DELETE",
     })
   }
+
+  // Get services by provider
+  async getServicesByProvider(providerId) {
+    return await ApiService.request(`/services/provider/${providerId}`)
+  }
+
+  // Get active services only
+  async getActiveServices() {
+    return await ApiService.request("/services?isActive=true")
+  }
 }
 
 export default new ServiceService()

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import ServiceService from '../services/serviceService';
+import BookingService from '../services/bookingService';
 
 const ServiceDetails = () => {
   const { id } = useParams();
@@ -26,14 +28,8 @@ const ServiceDetails = () => {
   const fetchServiceDetails = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/services/${id}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch service details');
-      }
-      
-      const data = await response.json();
-      setService(data.service || data);
+      const response = await ServiceService.getServiceById(id);
+      setService(response.service || response);
     } catch (err) {
       setError('Failed to load service details');
       console.error('Error fetching service:', err);
@@ -92,27 +88,14 @@ const ServiceDetails = () => {
       
       console.log('📤 Sending booking data:', bookingData);
       
-      const response = await fetch('/api/bookings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}` // Adjust based on your auth system
-        },
-        body: JSON.stringify(bookingData)
-      });
+      const response = await BookingService.createBooking(bookingData);
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to create booking');
+      if (response.success) {
+        alert('Booking request sent successfully!');
+        handleCloseHireModal();
+      } else {
+        throw new Error(response.message || 'Failed to create booking');
       }
-
-      // Success
-      alert('Booking request sent successfully!');
-      handleCloseHireModal();
-      
-      // Optionally navigate to bookings page
-      // navigate('/my-bookings');
       
     } catch (err) {
       setBookingError(err.message || 'Failed to create booking');
@@ -194,12 +177,24 @@ const ServiceDetails = () => {
                   <div>
                     <span className="text-sm text-gray-600">Base Price:</span>
                     <p className="text-2xl font-bold text-green-600">
-                      ${service.basePrice || service.price}/{service.unit || 'hour'}
+                      ${service.basePrice || service.price}/{service.unit || 'service'}
                     </p>
                   </div>
                   <div>
                     <span className="text-sm text-gray-600">Category:</span>
                     <p className="font-medium text-gray-900">{service.category?.name || 'General'}</p>
+                  </div>
+                </div>
+
+                {/* Additional Service Info */}
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div>
+                    <span className="text-sm text-gray-600">Duration:</span>
+                    <p className="font-medium text-gray-900">{service.duration || 60} minutes</p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-600">Difficulty:</span>
+                    <p className="font-medium text-gray-900 capitalize">{service.difficulty || 'medium'}</p>
                   </div>
                 </div>
               </div>
@@ -218,16 +213,30 @@ const ServiceDetails = () => {
           <div className="p-6">
             <h3 className="text-xl font-semibold mb-4">Service Details</h3>
             <div className="prose max-w-none">
-              <p className="text-gray-700">{service.fullDescription || service.description}</p>
+              <p className="text-gray-700">{service.description}</p>
             </div>
             
-            {/* Service Features */}
-            {service.features && service.features.length > 0 && (
+            {/* Keywords */}
+            {service.keywords && service.keywords.length > 0 && (
               <div className="mt-6">
-                <h4 className="font-semibold mb-3">What's Included:</h4>
+                <h4 className="font-semibold mb-3">Keywords:</h4>
+                <div className="flex flex-wrap gap-2">
+                  {service.keywords.map((keyword, index) => (
+                    <span key={index} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">
+                      {keyword}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Requirements */}
+            {service.requirements && service.requirements.length > 0 && (
+              <div className="mt-6">
+                <h4 className="font-semibold mb-3">Requirements:</h4>
                 <ul className="list-disc list-inside space-y-1">
-                  {service.features.map((feature, index) => (
-                    <li key={index} className="text-gray-700">{feature}</li>
+                  {service.requirements.map((requirement, index) => (
+                    <li key={index} className="text-gray-700">{requirement}</li>
                   ))}
                 </ul>
               </div>
@@ -254,7 +263,7 @@ const ServiceDetails = () => {
               {/* Service Summary */}
               <div className="bg-gray-50 p-3 rounded-lg mb-4">
                 <h4 className="font-medium text-gray-900">{service.provider?.name || 'Service Provider'}</h4>
-                <p className="text-sm text-gray-600">Base Price: ${service.basePrice || service.price}/hour</p>
+                <p className="text-sm text-gray-600">Base Price: ${service.basePrice || service.price}/{service.unit || 'service'}</p>
               </div>
 
               <form onSubmit={handleBookingSubmit} className="space-y-4">
@@ -312,7 +321,7 @@ const ServiceDetails = () => {
                     Service: {service.name}<br />
                     Date: {bookingDate ? new Date(bookingDate).toLocaleDateString() : 'Not selected'}<br />
                     Time: {bookingTime || 'Not selected'}<br />
-                    Price: ${service.price || service.basePrice}/{service.unit || 'service'}
+                    Price: ${service.basePrice || service.price}/{service.unit || 'service'}
                   </p>
                 </div>
 
