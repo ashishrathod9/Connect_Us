@@ -27,19 +27,11 @@ const Dashboard = () => {
         setBookings(response.bookings || response || [])
       }
 
-      // Ensure minimum 20 second loading time
-      const elapsedTime = Date.now() - startTime
-      const remainingTime = Math.max(0, 20000 - elapsedTime)
-
-      setTimeout(() => {
-        setLoading(false)
-      }, remainingTime)
+      setLoading(false)
     } catch (err) {
       setError("An error occurred while fetching hires.")
       console.error(err)
-      setTimeout(() => {
-        setLoading(false)
-      }, 20000)
+      setLoading(false)
     }
   }
 

@@ -35,7 +35,6 @@ const Services = () => {
 
   const fetchServices = async () => {
     try {
-      const startTime = Date.now()
       setLoading(true)
       const response = await ServiceService.getAllServices()
       console.log("Services API Response:", response)
@@ -52,25 +51,16 @@ const Services = () => {
 
       setServices(servicesData)
 
-      // Ensure minimum 20 second loading time
-      const elapsedTime = Date.now() - startTime
-      const remainingTime = Math.max(0, 20000 - elapsedTime)
-
-      setTimeout(() => {
-        setLoading(false)
-      }, remainingTime)
+      setLoading(false)
     } catch (error) {
       console.error("Error fetching services:", error)
       setServices([])
-      setTimeout(() => {
-        setLoading(false)
-      }, 20000)
+      setLoading(false)
     }
   }
 
   const fetchServicesByCategory = async (categoryId) => {
     try {
-      const startTime = Date.now()
       setLoading(true)
       const response = await ServiceService.getServicesByCategory(categoryId)
       console.log("Category Services API Response:", response)
@@ -87,19 +77,11 @@ const Services = () => {
 
       setServices(servicesData)
 
-      // Ensure minimum 20 second loading time
-      const elapsedTime = Date.now() - startTime
-      const remainingTime = Math.max(0, 20000 - elapsedTime)
-
-      setTimeout(() => {
-        setLoading(false)
-      }, remainingTime)
+      setLoading(false)
     } catch (error) {
       console.error("Error fetching services by category:", error)
       setServices([])
-      setTimeout(() => {
-        setLoading(false)
-      }, 20000)
+      setLoading(false)
     }
   }
 
@@ -130,7 +112,6 @@ const Services = () => {
     if (!searchQuery.trim()) return
 
     try {
-      const startTime = Date.now()
       setLoading(true)
       const response = await ServiceService.searchServices(searchQuery)
       console.log("Search API Response:", response)
@@ -149,19 +130,11 @@ const Services = () => {
       setSelectedCategory("")
       setSearchParams({})
 
-      // Ensure minimum 20 second loading time
-      const elapsedTime = Date.now() - startTime
-      const remainingTime = Math.max(0, 20000 - elapsedTime)
-
-      setTimeout(() => {
-        setLoading(false)
-      }, remainingTime)
+      setLoading(false)
     } catch (error) {
       console.error("Error searching services:", error)
       setServices([])
-      setTimeout(() => {
-        setLoading(false)
-      }, 20000)
+      setLoading(false)
     }
   }
 

@@ -25,24 +25,15 @@ const ServiceDetails = () => {
 
   const fetchService = async () => {
     try {
-      const startTime = Date.now()
       setLoading(true)
       const response = await ServiceService.getServiceById(id)
       setService(response)
 
-      // Ensure minimum 20 second loading time
-      const elapsedTime = Date.now() - startTime
-      const remainingTime = Math.max(0, 20000 - elapsedTime)
-
-      setTimeout(() => {
-        setLoading(false)
-      }, remainingTime)
+      setLoading(false)
     } catch (error) {
       setError("Service not found")
       console.error("Error fetching service:", error)
-      setTimeout(() => {
-        setLoading(false)
-      }, 5000)
+      setLoading(false)
     }
   }
 

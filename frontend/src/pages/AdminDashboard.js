@@ -39,19 +39,11 @@ const AdminDashboard = () => {
       setProviders(providersData)
       setApplications(applicationsData)
 
-      // Ensure minimum 5 second loading time
-      const elapsedTime = Date.now() - startTime
-      const remainingTime = Math.max(0, 20000 - elapsedTime)
-
-      setTimeout(() => {
-        setLoading(false)
-      }, remainingTime)
+      setLoading(false)
     } catch (error) {
       setError("Failed to fetch data")
       console.error("Error fetching admin data:", error)
-      setTimeout(() => {
-        setLoading(false)
-      }, 5000)
+      setLoading(false)
     }
   }
 

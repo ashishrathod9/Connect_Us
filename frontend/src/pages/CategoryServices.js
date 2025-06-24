@@ -15,7 +15,6 @@ const CategoryServices = () => {
 
   const fetchCategoryServices = async () => {
     try {
-      const startTime = Date.now()
       setLoading(true)
       const [servicesData, categoryData] = await Promise.all([
         AuthService.getServicesByCategory(categoryId),
@@ -24,19 +23,11 @@ const CategoryServices = () => {
       setServices(servicesData.services || servicesData || [])
       setCategory(categoryData)
 
-      // Ensure minimum 20 second loading time
-      const elapsedTime = Date.now() - startTime
-      const remainingTime = Math.max(0, 20000 - elapsedTime)
-
-      setTimeout(() => {
-        setLoading(false)
-      }, remainingTime)
+      setLoading(false)
     } catch (err) {
       setError("Failed to fetch services for this category.")
       console.error(err)
-      setTimeout(() => {
-        setLoading(false)
-      }, 20000)
+      setLoading(false)
     }
   }
 

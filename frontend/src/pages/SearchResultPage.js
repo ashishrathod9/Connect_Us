@@ -22,24 +22,15 @@ const SearchResultPage = () => {
 
     const fetchResults = async () => {
       try {
-        const startTime = Date.now()
         setLoading(true)
         const response = await AuthService.searchServices(query)
         setResults(response || [])
 
-        // Ensure minimum 20 second loading time
-        const elapsedTime = Date.now() - startTime
-        const remainingTime = Math.max(0, 20000 - elapsedTime)
-
-        setTimeout(() => {
-          setLoading(false)
-        }, remainingTime)
+        setLoading(false)
       } catch (err) {
         setError("An error occurred while searching.")
         console.error(err)
-        setTimeout(() => {
-          setLoading(false)
-        }, 20000)
+        setLoading(false)
       }
     }
 
