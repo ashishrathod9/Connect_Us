@@ -364,6 +364,7 @@ const ServiceManagement = () => {
             setEditingService(null)
           }}
           title={editingService ? "Edit Service" : "Add Service"}
+          size="lg"
         >
           <ServiceForm
             onSubmit={handleServiceSubmit}
