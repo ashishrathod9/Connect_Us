@@ -389,27 +389,25 @@ const Services = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-2xl font-bold text-gray-900">
-                        ${service.basePrice}
+                        ${service.basePrice || service.price || "50"}
                       </span>
                       <span className="text-sm text-gray-600 ml-1">
-                        {service.unit}
+                        {service.unit === "fixed" ? "fixed price" : service.unit || "starting from"}
                       </span>
                     </div>
 
-                    <Link
+                    {/* <Link
                       to={`/services/${service._id}`}
                       className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                     >
                       View Details
-                    </Link>
+                    </Link> */}
                   </div>
-                  
                   <button
                     onClick={() => handleOpenHireModal(service)}
                     className="w-full mt-4 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200"
-                    disabled={!service.isActive}
                   >
-                    {service.isActive ? 'Hire Now' : 'Service Unavailable'}
+                    Hire Now
                   </button>
                 </div>
               </div>
@@ -417,7 +415,6 @@ const Services = () => {
           </div>
         )}
       </div>
-
       {/* Hire Modal */}
       {showHireModal && selectedService && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -434,9 +431,7 @@ const Services = () => {
             <div className="mb-4 p-3 bg-gray-50 rounded">
               <h3 className="font-semibold">{selectedService.name}</h3>
               <p className="text-sm text-gray-600">Provider: {selectedService.provider?.name}</p>
-              <p className="text-sm text-gray-600">Base Price: ${selectedService.basePrice} {selectedService.unit}</p>
-              <p className="text-sm text-gray-600">Duration: {selectedService.duration} minutes</p>
-              <p className="text-sm text-gray-600">Difficulty: {selectedService.difficulty}</p>
+              <p className="text-sm text-gray-600">Base Price: ${selectedService.basePrice}/{selectedService.unit}</p>
             </div>
             {bookingError && (
               <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -476,9 +471,7 @@ const Services = () => {
                 <textarea
                   value={bookingNotes}
                   onChange={e => setBookingNotes(e.target.value)}
-                  placeholder="Any special requirements or notes..."
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={3}
                 />
               </div>
               <button
