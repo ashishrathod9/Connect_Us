@@ -51,7 +51,6 @@ const Services = () => {
       }
 
       setServices(servicesData)
-
       setLoading(false)
     } catch (error) {
       console.error("Error fetching services:", error)
@@ -77,7 +76,6 @@ const Services = () => {
       }
 
       setServices(servicesData)
-
       setLoading(false)
     } catch (error) {
       console.error("Error fetching services by category:", error)
@@ -130,7 +128,6 @@ const Services = () => {
       setServices(servicesData)
       setSelectedCategory("")
       setSearchParams({})
-
       setLoading(false)
     } catch (error) {
       console.error("Error searching services:", error)
@@ -182,16 +179,20 @@ const Services = () => {
     setBookingError("")
     
     try {
-      console.log('Form data received:', {
-        serviceId: selectedService._id,
-        scheduledDate: `${bookingDate}T${bookingTime}:00`,
-        notes: bookingNotes || ''
-      })
+      // Combine date and time into ISO string
+      const scheduledDateTime = new Date(`${bookingDate}T${bookingTime}`)
       
-      // Prepare booking data without location
+      if (isNaN(scheduledDateTime.getTime())) {
+        throw new Error('Invalid date or time selected')
+      }
+
+      if (scheduledDateTime <= new Date()) {
+        throw new Error('Scheduled date must be in the future')
+      }
+
       const bookingData = {
         serviceId: selectedService._id,
-        scheduledDate: `${bookingDate}T${bookingTime}:00`,
+        scheduledDate: scheduledDateTime.toISOString(),
         notes: bookingNotes || ''
       }
 
@@ -331,24 +332,32 @@ const Services = () => {
                   <p className="text-gray-600 mb-4 line-clamp-2">{service.description}</p>
 
                   <div className="space-y-2 mb-4">
-                    {service.rating && (
-                      <div className="flex items-center text-sm text-gray-600">
-                        <Star size={16} className="text-yellow-400 mr-1" />
-                        <span>{service.rating}</span>
-                        {service.reviewCount && <span className="ml-1">({service.reviewCount} reviews)</span>}
-                      </div>
-                    )}
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Star size={16} className="text-yellow-400 mr-1" />
+                      <span>{service.rating || 0}</span>
+                      <span className="ml-1">({service.reviewCount || 0} reviews)</span>
+                    </div>
 
-                    {service.location && (
-                      <div className="flex items-center text-sm text-gray-600">
-                        <MapPin size={16} className="mr-1" />
-                        <span>{service.location}</span>
-                      </div>
-                    )}
+                    <div className="flex items-center text-sm text-gray-600">
+                      <MapPin size={16} className="mr-1" />
+                      <span>{service.provider?.address || service.provider?.location || "Location not specified"}</span>
+                    </div>
 
                     <div className="flex items-center text-sm text-gray-600">
                       <Clock size={16} className="mr-1" />
                       <span>{service.duration ? `${service.duration} minutes` : "Duration varies"}</span>
+                    </div>
+
+                    {/* Difficulty Badge */}
+                    <div className="flex items-center text-sm">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        service.difficulty === 'easy' ? 'bg-green-100 text-green-800' :
+                        service.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                        service.difficulty === 'hard' ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {service.difficulty ? service.difficulty.charAt(0).toUpperCase() + service.difficulty.slice(1) : 'Medium'}
+                      </span>
                     </div>
                   </div>
 
@@ -361,13 +370,29 @@ const Services = () => {
                     </div>
                   )}
 
+                  {/* Keywords */}
+                  {service.keywords && service.keywords.length > 0 && (
+                    <div className="mb-4">
+                      <div className="flex flex-wrap gap-1">
+                        {service.keywords.slice(0, 3).map((keyword, index) => (
+                          <span key={index} className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs">
+                            {keyword}
+                          </span>
+                        ))}
+                        {service.keywords.length > 3 && (
+                          <span className="text-gray-500 text-xs">+{service.keywords.length - 3} more</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-2xl font-bold text-gray-900">
-                        ${service.basePrice || service.price || "50"}
+                        ${service.basePrice}
                       </span>
                       <span className="text-sm text-gray-600 ml-1">
-                        {service.unit === "fixed" ? "fixed price" : service.unit || "starting from"}
+                        {service.unit}
                       </span>
                     </div>
 
@@ -378,11 +403,13 @@ const Services = () => {
                       View Details
                     </Link>
                   </div>
+                  
                   <button
                     onClick={() => handleOpenHireModal(service)}
                     className="w-full mt-4 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200"
+                    disabled={!service.isActive}
                   >
-                    Hire Now
+                    {service.isActive ? 'Hire Now' : 'Service Unavailable'}
                   </button>
                 </div>
               </div>
@@ -390,6 +417,7 @@ const Services = () => {
           </div>
         )}
       </div>
+
       {/* Hire Modal */}
       {showHireModal && selectedService && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -406,7 +434,9 @@ const Services = () => {
             <div className="mb-4 p-3 bg-gray-50 rounded">
               <h3 className="font-semibold">{selectedService.name}</h3>
               <p className="text-sm text-gray-600">Provider: {selectedService.provider?.name}</p>
-              <p className="text-sm text-gray-600">Base Price: ${selectedService.basePrice}/{selectedService.unit}</p>
+              <p className="text-sm text-gray-600">Base Price: ${selectedService.basePrice} {selectedService.unit}</p>
+              <p className="text-sm text-gray-600">Duration: {selectedService.duration} minutes</p>
+              <p className="text-sm text-gray-600">Difficulty: {selectedService.difficulty}</p>
             </div>
             {bookingError && (
               <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -446,7 +476,9 @@ const Services = () => {
                 <textarea
                   value={bookingNotes}
                   onChange={e => setBookingNotes(e.target.value)}
+                  placeholder="Any special requirements or notes..."
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows={3}
                 />
               </div>
               <button

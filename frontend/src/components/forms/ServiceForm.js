@@ -20,13 +20,20 @@ const ServiceForm = ({ onSubmit, service, categories, isLoading }) => {
   // Ensure categories is always an array
   const safeCategories = Array.isArray(categories) ? categories : []
 
+  // Debug logging
+  useEffect(() => {
+    console.log("ServiceForm rendered with fields:", Object.keys(formData))
+    console.log("Categories received:", categories)
+    console.log("Safe categories:", safeCategories)
+  }, [formData, categories, safeCategories])
+
   useEffect(() => {
     if (service) {
       setFormData({
         name: service.name || "",
         description: service.description || "",
         category: service.category?._id || service.category || "",
-        basePrice: service.basePrice || service.price || "",
+        basePrice: service.basePrice || "",
         unit: service.unit || "per service",
         imageUrl: service.imageUrl || "",
         keywords: Array.isArray(service.keywords) ? service.keywords.join(", ") : "",
@@ -100,6 +107,7 @@ const ServiceForm = ({ onSubmit, service, categories, isLoading }) => {
       isActive: formData.isActive,
     }
 
+    console.log("Submitting service data:", submitData)
     onSubmit(submitData)
   }
 
@@ -120,6 +128,7 @@ const ServiceForm = ({ onSubmit, service, categories, isLoading }) => {
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Enter service name"
         />
+        <p className="text-xs text-gray-500 mt-1">Maximum 200 characters</p>
       </div>
 
       <div>
@@ -137,6 +146,7 @@ const ServiceForm = ({ onSubmit, service, categories, isLoading }) => {
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Enter detailed service description"
         />
+        <p className="text-xs text-gray-500 mt-1">Maximum 2000 characters</p>
       </div>
 
       <div>
